@@ -1,0 +1,13 @@
+[package]
+name = "arithmetic-rs"
+version = "0.1.0"
+authors = ["Chris Burgess <cburgess4397@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bitbit = "0.2.0"
+fenwick = "0.2.0"
+
+[[bin]]
+name = "mybin"
+path = "src/bin.rs"
