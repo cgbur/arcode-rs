@@ -5,7 +5,7 @@ pub struct Range {
     pub low: u64,
     pub half: u64,
     pub one_quarter_mark: u64,
-    pub three_quarter_mark: u64,
+    pub three_quarter_mark: u64
 }
 
 impl Range {
@@ -17,7 +17,7 @@ impl Range {
             low: 0,
             half: high / 2,
             one_quarter_mark: high / 4,
-            three_quarter_mark: (high / 4) * 3,
+            three_quarter_mark: (high / 4) * 3
         }
     }
     pub fn in_bottom_half(&self) -> bool {
@@ -54,8 +54,8 @@ impl Range {
     pub fn calculate_range(&mut self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
         let new_width = self.high - self.low;
         let probability = source_model.get_probability(symbol);
-        (((self.low as f64 + (new_width as f64 * probability.0)) as u64),
-         (self.low as f64 + (new_width as f64 * probability.1)) as u64)
+        ((self.low + (new_width as f64 * probability.0) as u64),
+         (self.low + (new_width as f64 * probability.1) as u64))
     }
 
     pub fn update_range(&mut self, low_high: (u64, u64)) {

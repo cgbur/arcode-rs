@@ -56,23 +56,16 @@ impl SourceModel {
     }
 
     pub fn get_probability(&self, symbol: u32) -> (f64, f64) {
-        let symbol_count = self.counts[symbol as usize];
         let total = self.total_count as f64;
 
-        let low: u32 =
-            prefix_sum(&self.fenwick_counts, symbol as usize) - symbol_count;
-        (low as f64 / total,
-         if symbol == self.len() {
-            1.0
-        } else {
-            (low + symbol_count) as f64 / total
-        })
+        let high = prefix_sum(&self.fenwick_counts, symbol as usize);
+        let low = high - self.counts[symbol as usize];
+        (low as f64 / total, high as f64 / total)
     }
-
     fn generate_symbol_vec(num_symbols: u32) -> Vec<u32> {
         (0..num_symbols).collect()
     }
-    pub fn get_eof(&self)-> u32{
+    pub fn get_eof(&self) -> u32 {
         self.eof
     }
 }

@@ -1,22 +1,22 @@
-use arithmetic_rs::util::source_model::SourceModel;
-use arithmetic_rs::encoding::encoder::ArithmeticEncoder;
 use std::fs;
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Write};
 use bitbit::{BitReader, MSB, BitWriter};
 use std::time::Instant;
-use arithmetic_rs::decoding::decoder::ArithmeticDecoder;
 use std::error::Error;
+use arithmetic_coder::util::source_model::SourceModel;
+use arithmetic_coder::encode::encoder::ArithmeticEncoder;
+use arithmetic_coder::decode::decoder::ArithmeticDecoder;
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     comp_decomp()?;
-
     Ok(())
 }
 
 fn comp_decomp() -> Result<(), Box<dyn Error>> {
     let num_symbols = 257;
-    let precision = 44;
+    let precision = 42;
     let input_path = "./new.txt";
     let compressed_path = "./compressed.dat";
     let uncompressed_path = "./decompressed.txt";
@@ -40,9 +40,9 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
         let mut buffered_output = BufWriter::new(output_file);
         let mut input: BitReader<&mut BufReader<File>, MSB> = BitReader::new(&mut buffer_input);
         let mut out_writer = BitWriter::new(&mut buffered_output);
-        let num_bytes = fs::metadata(input_path).unwrap().len();
         let encode_start = Instant::now();
 
+        let num_bytes = fs::metadata(input_path).unwrap().len();
         let mut current_model = &mut models[0];
         for x in 0..num_bytes {
             if x % byte_break == 0 {
@@ -57,7 +57,7 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
         encoder.finish_encode( &mut out_writer)?;
         out_writer.pad_to_byte()?;
         let finished = encode_start.elapsed().as_millis();
-        println!("{:.2}Mbps", ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1048576 as f64);
+        println!("{:.2}Mbps", ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1000000 as f64);
         buffered_output.flush()?;
     }
 
@@ -100,7 +100,7 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
             x += 1;
         }
         let finished = decode_start.elapsed().as_millis();
-        println!("{:.2}Mbps", ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1048576 as f64);
+        println!("{:.2}Mbps", ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1000000 as f64);
 
         buffered_output.flush()?;
     }
@@ -113,12 +113,17 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
     if fs::metadata(uncompressed_path).unwrap().len() == fs::metadata(input_path).unwrap().len() {
         println!("files are same length");
         let mut matching = true;
+        let check_start = Instant::now();
+
         for i in 0..num_bytes {
             if i1.read_byte()? != i2.read_byte()? {
                 matching = false;
             }
         }
         println!("Matching? {}", matching);
+        let finished = check_start.elapsed().as_millis();
+        println!("{:.2}Mbps", ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1000000 as f64);
+
     } else {
         println!("files not same length")
     }
