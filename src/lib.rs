@@ -17,7 +17,8 @@
 //! - [Decoder](decode/decoder/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
 //!
 //! # Examples
-//! In the git repository there is an example.rs file that is a complete
+//! In the git repository there is an [example.rs](https://github.com/Dakati/arithmetic-rs/blob/master/example/example.rs)
+//! file that is a complete
 //! encode and decode with some benchmarks. It is hard to construct examples that
 //! run in the markdown because I don't have access to actual files.
 //! ## Input and output bitstreams
@@ -67,7 +68,30 @@
 //! // update the probability of symbol 4.
 //! model_with_eof.update_symbol(4);
 //!```
+//! ## Encode/Decode
+//! ```rust
+//! use arithmetic_coder::encode::encoder::ArithmeticEncoder;
+//! use arithmetic_coder::util::source_model::SourceModel;
+//! use arithmetic_coder::decode::decoder::ArithmeticDecoder;
+//! use bitbit::{BitWriter, BitReader, MSB};
+//! use std::io::Cursor;
 //!
+//! let mut encoder = ArithmeticEncoder::new(30);
+//! let mut source_model = SourceModel::new(10, 9);
+//! let mut output = Cursor::new(vec![]);
+//! let mut out_writer = BitWriter::new(&mut output);
+//! encoder.encode(7, &mut source_model, &mut out_writer);
+//! encoder.finish_encode(&mut out_writer);
+//! out_writer.pad_to_byte();
+//! output.set_position(0);
+//!
+//!
+//! let mut decoder = ArithmeticDecoder::new(30);
+//! let mut source_model = SourceModel::new(10, 9);
+//! let mut input_reader: BitReader<_, MSB> = BitReader::new(output);
+//! let symbol = decoder.decode(&source_model, &mut input_reader).unwrap();
+//! println!("{}", symbol);
+//! ```
 //! ## Encode
 //! An example of using multiple models to context adaptive encode
 //! ```rust
@@ -140,8 +164,6 @@
 //! }
 //! buffered_output.flush().unwrap();
 //! ```
-//!
-//!
 
 
 pub mod util;
