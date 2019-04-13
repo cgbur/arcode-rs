@@ -36,7 +36,7 @@ impl SourceModel {
         }
     }
 
-    pub fn add_symbol(&mut self, symbol: u32) {
+    pub fn update_symbol(&mut self, symbol: u32) {
         self.total_count += 1;
         self.counts[symbol as usize] += 1;
         update(&mut self.fenwick_counts, symbol as usize, 1);

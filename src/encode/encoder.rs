@@ -11,6 +11,10 @@ pub struct ArithmeticEncoder {
 }
 
 impl ArithmeticEncoder {
+    /// # Arguments
+   /// `precision` is the [bit precision](https://en.wikipedia.org/wiki/Arithmetic_coding#Precision_and_renormalization)
+   /// that the encoder should use. If the
+   /// precision is too low than symbols will not be able to be differentiated.
     pub fn new(precision: u64) -> Self {
         Self {
             _precision: precision,

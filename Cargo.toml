@@ -7,7 +7,3 @@ edition = "2018"
 [dependencies]
 bitbit = "0.2.0"
 fenwick = "0.2.0"
-
-[[bin]]
-name = "mybin"
-path = "src/bin.rs"

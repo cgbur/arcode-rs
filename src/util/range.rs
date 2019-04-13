@@ -5,7 +5,7 @@ pub struct Range {
     pub low: u64,
     pub half: u64,
     pub one_quarter_mark: u64,
-    pub three_quarter_mark: u64
+    pub three_quarter_mark: u64,
 }
 
 impl Range {
@@ -17,7 +17,7 @@ impl Range {
             low: 0,
             half: high / 2,
             one_quarter_mark: high / 4,
-            three_quarter_mark: (high / 4) * 3
+            three_quarter_mark: (high / 4) * 3,
         }
     }
     pub fn in_bottom_half(&self) -> bool {
@@ -33,24 +33,23 @@ impl Range {
         self.low <= self.one_quarter_mark
     }
 
-    //scaling the upper half is a left shift, to avoid overflow we minus a 1/2 first
+    /// scaling the upper half is a left shift, to avoid overflow we minus a 1/2 first
     pub fn scale_upper_half(&mut self) {
         self.low = (self.low - self.half) << 1;
         self.high = (self.high - self.half) << 1;
     }
-    //subtract a quarter is the same as shifting out the second most significant bit
+    /// subtract a quarter is the same as shifting out the second most significant bit
     pub fn scale_middle_half(&mut self) {
         self.low = (self.low - self.one_quarter_mark) << 1;
         self.high = (self.high - self.one_quarter_mark) << 1;
     }
-    //scaling the bottom half in a left shift
+    /// scaling the bottom half in a left shift
     pub fn scale_bottom_half(&mut self) {
         self.low <<= 1;
         self.high <<= 1;
     }
 
-
-    //returns (low, high)
+    /// returns (low, high)
     pub fn calculate_range(&mut self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
         let new_width = self.high - self.low;
         let probability = source_model.get_probability(symbol);

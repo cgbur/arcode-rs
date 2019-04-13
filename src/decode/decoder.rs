@@ -4,7 +4,6 @@ use bitbit::BitReader;
 use crate::util::range::Range;
 use crate::util::source_model::SourceModel;
 
-
 pub struct ArithmeticDecoder {
     range: Range,
     precision: u64,
@@ -14,6 +13,10 @@ pub struct ArithmeticDecoder {
 }
 
 impl ArithmeticDecoder {
+    /// # Arguments
+    /// `precision` is the [bit precision](https://en.wikipedia.org/wiki/Arithmetic_coding#Precision_and_renormalization)
+    /// that the decoder should use. If the
+    /// precision is too low than symbols will not be able to be differentiated.
     pub fn new(precision: u64) -> Self {
         Self {
             range: Range::new(precision),
@@ -28,12 +31,14 @@ impl ArithmeticDecoder {
         &mut self, source_model:
         &SourceModel, bit_source:
         &mut BitReader<R, B>) -> Result<u32, Error> {
+
         if self.first_time {
             for _i in 0..self.precision {
                 self.input_buffer = (self.input_buffer << 1) | self.get_bit(bit_source)?;
             }
             self.first_time = false;
         }
+
         let symbol: u32;
         let mut low_high: (u64, u64);
         let mut sym_idx_low_high = (0, source_model.len());
