@@ -63,3 +63,28 @@ impl ArithmeticEncoder {
         Ok(true)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::encode::encoder::ArithmeticEncoder;
+    use crate::util::source_model::SourceModel;
+    use std::io::Cursor;
+    use bitbit::BitWriter;
+
+    #[test]
+    fn e2e() {
+        let mut encoder = ArithmeticEncoder::new(30);
+        let mut source_model = SourceModel::new(10, 9);
+        let mut output = Cursor::new(vec![]);
+        let mut out_writer = BitWriter::new(&mut output);
+        let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
+        for x in to_encode.iter() {
+            encoder.encode(*x, &mut source_model, &mut out_writer).unwrap();
+            source_model.update_symbol(*x);
+        }
+        encoder.encode(source_model.get_eof(), &source_model, &mut out_writer).unwrap();
+        encoder.finish_encode(&mut out_writer).unwrap();
+        out_writer.pad_to_byte().unwrap();
+        assert_eq!(output.get_ref(), &[184, 96, 208]);
+    }
+}

@@ -1,11 +1,11 @@
 use crate::util::source_model::SourceModel;
 
 pub struct Range {
-    pub high: u64,
-    pub low: u64,
-    pub half: u64,
-    pub one_quarter_mark: u64,
-    pub three_quarter_mark: u64,
+    high: u64,
+    low: u64,
+    half: u64,
+    one_quarter_mark: u64,
+    three_quarter_mark: u64,
 }
 
 impl Range {
@@ -50,7 +50,7 @@ impl Range {
     }
 
     /// returns (low, high)
-    pub fn calculate_range(&mut self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
+    pub fn calculate_range(&self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
         let new_width = self.high - self.low;
         let probability = source_model.get_probability(symbol);
         ((self.low + (new_width as f64 * probability.0) as u64),
@@ -60,5 +60,66 @@ impl Range {
     pub fn update_range(&mut self, low_high: (u64, u64)) {
         self.low = low_high.0;
         self.high = low_high.1;
+    }
+
+    pub fn get_half(&self) -> u64 {
+        self.half
+    }
+    pub fn get_quarter(&self) -> u64 {
+        self.one_quarter_mark
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::util::range::Range;
+    use crate::util::source_model::SourceModel;
+
+    #[test]
+    fn constructor() {
+        let range = Range::new(5);
+        assert_eq!(range.high, 32);
+        assert_eq!(range.one_quarter_mark, range.high / 4);
+        assert_eq!(range.half, range.high / 2);
+        assert_eq!(range.three_quarter_mark, range.high - range.one_quarter_mark);
+
+        assert_eq!(range.half, range.get_half());
+        assert_eq!(range.one_quarter_mark, range.get_quarter());
+    }
+
+    #[test]
+    fn calculate_range() {
+        let model = SourceModel::new(3, 3);
+        let range = Range::new(8);
+        assert_eq!(range.calculate_range(0, &model), (0, 85));
+        assert_eq!(range.calculate_range(1, &model), (85, 170));
+        assert_eq!(range.calculate_range(2, &model), (170, 256));
+    }
+
+    #[test]
+    fn test_range() {
+        let model = SourceModel::new(3, 3);
+        let mut range = Range::new(8);
+        range.update_range(range.calculate_range(0, &model));
+        assert_eq!(range.in_bottom_half(), true);
+        assert_eq!(range.in_upper_half(), false);
+        assert_eq!(range.in_middle_half(), false);
+        assert_eq!(range.in_bottom_quarter(), true);
+
+        let model = SourceModel::new(3, 3);
+        let mut range = Range::new(8);
+        range.update_range(range.calculate_range(2, &model));
+        assert_eq!(range.in_bottom_half(), false);
+        assert_eq!(range.in_upper_half(), true);
+        assert_eq!(range.in_middle_half(), false);
+        assert_eq!(range.in_bottom_quarter(), false);
+
+        let model = SourceModel::new(100, 3);
+        let mut range = Range::new(12);
+        range.update_range(range.calculate_range(50, &model));
+        assert_eq!(range.in_bottom_half(), false);
+        assert_eq!(range.in_upper_half(), false);
+        assert_eq!(range.in_middle_half(), true);
+        assert_eq!(range.in_bottom_quarter(), false);
     }
 }

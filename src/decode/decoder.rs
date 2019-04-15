@@ -31,7 +31,6 @@ impl ArithmeticDecoder {
         &mut self, source_model:
         &SourceModel, bit_source:
         &mut BitReader<R, B>) -> Result<u32, Error> {
-
         if self.first_time {
             for _i in 0..self.precision {
                 self.input_buffer = (self.input_buffer << 1) | self.get_bit(bit_source)?;
@@ -67,13 +66,13 @@ impl ArithmeticDecoder {
                 self.input_buffer = (2 * self.input_buffer) | self.get_bit(bit_source)?;
             } else if self.range.in_upper_half() {
                 self.range.scale_upper_half();
-                self.input_buffer = (2 * (self.input_buffer - self.range.half)) | self.get_bit(bit_source)?;
+                self.input_buffer = (2 * (self.input_buffer - self.range.get_half())) | self.get_bit(bit_source)?;
             }
         }
 
         while self.range.in_middle_half() {
             self.range.scale_middle_half();
-            self.input_buffer = (2 * (self.input_buffer - self.range.one_quarter_mark)) | self.get_bit(bit_source)?;
+            self.input_buffer = (2 * (self.input_buffer - self.range.get_quarter())) | self.get_bit(bit_source)?;
         }
         Ok(symbol)
     }
@@ -99,4 +98,28 @@ impl ArithmeticDecoder {
         self.finished = true;
     }
     pub fn is_finished(&self) -> bool { self.finished }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+    use crate::util::source_model::SourceModel;
+    use bitbit::{BitReader, MSB};
+    use crate::decode::decoder::ArithmeticDecoder;
+
+    #[test]
+    fn e2e() {
+        let input = Cursor::new(vec![184, 96, 208]);
+        let mut source_model = SourceModel::new(10, 9);
+        let mut output = Vec::new();
+        let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
+
+        let mut decoder = ArithmeticDecoder::new(30);
+        while !decoder.is_finished() {
+            let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
+            source_model.update_symbol(sym);
+            if sym != source_model.get_eof() { output.push(sym) };
+        }
+        assert_eq!(output, &[7, 2, 2, 2, 7]);
+    }
 }

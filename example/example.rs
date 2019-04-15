@@ -4,9 +4,9 @@ use std::io::{BufReader, BufWriter, Write};
 use bitbit::{BitReader, MSB, BitWriter};
 use std::time::Instant;
 use std::error::Error;
-use arithmetic_coder::util::source_model::SourceModel;
-use arithmetic_coder::encode::encoder::ArithmeticEncoder;
-use arithmetic_coder::decode::decoder::ArithmeticDecoder;
+use arcode::util::source_model::SourceModel;
+use arcode::encode::encoder::ArithmeticEncoder;
+use arcode::decode::decoder::ArithmeticDecoder;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -18,9 +18,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn comp_decomp() -> Result<(), Box<dyn Error>> {
     let num_symbols = 257;
     let precision = 42;
-    let input_path = "./sherlock.txt";
-    let compressed_path = "./compressed.dat";
-    let uncompressed_path = "./decompressed.txt";
+    let input_path = "./example/sherlock.txt";
+    let compressed_path = "./example/compressed.dat";
+    let uncompressed_path = "./example/decompressed.txt";
 
 
     let num_bytes = fs::metadata(input_path).unwrap().len();

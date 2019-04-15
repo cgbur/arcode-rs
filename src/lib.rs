@@ -57,7 +57,7 @@
 //! out of phase with the encoder you will be decoding nonsense.
 //!
 //! ```rust
-//! use arithmetic_coder::util::source_model::SourceModel;
+//! use arcode::util::source_model::SourceModel;
 //! // create a new model that has symbols 0-256
 //! // 8 bit values + one EOF marker
 //! let mut model_with_eof = SourceModel::new(257, 256);
@@ -68,101 +68,51 @@
 //! // update the probability of symbol 4.
 //! model_with_eof.update_symbol(4);
 //!```
-//! ## Encode/Decode
+//! ## Encode
+//! Encoding some simple input
 //! ```rust
-//! use arithmetic_coder::encode::encoder::ArithmeticEncoder;
-//! use arithmetic_coder::util::source_model::SourceModel;
-//! use arithmetic_coder::decode::decoder::ArithmeticDecoder;
-//! use bitbit::{BitWriter, BitReader, MSB};
+//! use arcode::encode::encoder::ArithmeticEncoder;
+//! use arcode::util::source_model::SourceModel;
 //! use std::io::Cursor;
+//! use bitbit::BitWriter;
 //!
 //! let mut encoder = ArithmeticEncoder::new(30);
 //! let mut source_model = SourceModel::new(10, 9);
 //! let mut output = Cursor::new(vec![]);
 //! let mut out_writer = BitWriter::new(&mut output);
-//! encoder.encode(7, &mut source_model, &mut out_writer);
-//! encoder.finish_encode(&mut out_writer);
-//! out_writer.pad_to_byte();
-//! output.set_position(0);
+//! let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
 //!
+//! for x in to_encode.iter() {
+//!     encoder.encode(*x, &mut source_model, &mut out_writer).unwrap();
+//!     source_model.update_symbol(*x);
+//! }
 //!
-//! let mut decoder = ArithmeticDecoder::new(30);
-//! let mut source_model = SourceModel::new(10, 9);
-//! let mut input_reader: BitReader<_, MSB> = BitReader::new(output);
-//! let symbol = decoder.decode(&source_model, &mut input_reader).unwrap();
-//! println!("{}", symbol);
-//! ```
-//! ## Encode
-//! An example of using multiple models to context adaptive encode
-//! ```rust
-//! // make 256 models (one for every value a byte can represent).
-//! use arithmetic_coder::util::source_model::SourceModel;
-//! use std::io::{Cursor, BufReader, BufWriter};
-//! use std::fs::File;
-//! use bitbit::{BitReader, BitWriter, MSB};
-//! use std::fs;
-//! use arithmetic_coder::encode::encoder::ArithmeticEncoder;
+//! encoder.encode(source_model.get_eof(), &source_model, &mut out_writer).unwrap();
+//! encoder.finish_encode(&mut out_writer).unwrap();
+//! out_writer.pad_to_byte().unwrap();
 //!
-//! let mut encoder = ArithmeticEncoder::new(42);
-//! let mut models = Vec::with_capacity(257);
-//!  for i in 0..257 {
-//!      models.push(SourceModel::new(257, 256));
-//!  }
-//! // setup your input
-//! //let input_file = File::open(input_path)?;
-//! let input = Cursor::new(vec![0,0,0]);
-//! let output = Cursor::new(vec![]);
-//! let mut buffer_input = BufReader::new(input);
-//! let mut buffered_output = BufWriter::new(output);
-//! let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
-//! let mut out_writer = BitWriter::new(&mut buffered_output);
-//!
-//!  //let num_bytes = fs::metadata(input_path).unwrap().len();
-//!   let num_bytes = 3;
-//!   let mut current_model = &mut models[0];
-//!   for x in 0..num_bytes {
-//!       let symbol: u32 = input.read_byte().unwrap() as u32;
-//!       encoder.encode(symbol, current_model, &mut out_writer).unwrap();
-//!       current_model.update_symbol(symbol);
-//!       current_model = &mut models[symbol as usize];
-//!   }
-//!   encoder.encode(current_model.get_eof(), current_model, &mut out_writer);
-//!   encoder.finish_encode( &mut out_writer).unwrap();
-//!   out_writer.pad_to_byte().unwrap();
+//! assert_eq!(output.get_ref(), &[184, 96, 208]);
 //! ```
 //! ## Decode
-//! Now to decode that same adaptive encode.
 //! ```rust
-//! use arithmetic_coder::decode::decoder::ArithmeticDecoder;
-//! use arithmetic_coder::util::source_model::SourceModel;
-//! use std::io::{Cursor, BufReader, BufWriter, Write};
-//! use bitbit::{BitReader, MSB, BitWriter};
-//! let mut decoder = ArithmeticDecoder::new(42);
-//! let mut models = Vec::with_capacity(257);
-//!  for i in 0..257 {
-//!      models.push(SourceModel::new(257, 256));
-//!  }
-//! // setup your input
-//! //let input_file = File::open(input_path)?;
-//! let input = Cursor::new(vec![0; 500]); //just an example so random length array
-//! let output = Cursor::new(vec![]);
-//! let mut buffer_input = BufReader::new(input);
-//! let mut buffered_output = BufWriter::new(output);
-//! let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
-//! let mut out_writer = BitWriter::new(&mut buffered_output);
+//! use std::io::Cursor;
+//! use arcode::util::source_model::SourceModel;
+//! use bitbit::{BitReader, MSB};
+//! use arcode::decode::decoder::ArithmeticDecoder;
 //!
-//! let mut current_model = &mut models[0];
+//! let input = Cursor::new(vec![184, 96, 208]);
+//! let mut source_model = SourceModel::new(10, 9);
+//! let mut output = Vec::new();
+//! let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
+//! let mut decoder = ArithmeticDecoder::new(30);
 //!
-//! // without a properly encoded file this wont work, please see the github for the entire
-//! // example that you can throw into a new rust project and run.
-//! //while !decoder.is_finished() {
-//! while false {
-//!     let sym = decoder.decode(current_model, &mut input).unwrap();
-//!     if sym != current_model.get_eof() { out_writer.write_byte(sym as u8).unwrap(); }
-//!     current_model.update_symbol(sym);
-//!     current_model = &mut models[sym as usize];
+//! while !decoder.is_finished() {
+//!     let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
+//!     source_model.update_symbol(sym);
+//!     if sym != source_model.get_eof() { output.push(sym)};
 //! }
-//! buffered_output.flush().unwrap();
+//!
+//! assert_eq!(output, &[7, 2, 2, 2, 7]);
 //! ```
 
 
