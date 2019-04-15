@@ -8,6 +8,8 @@ homepage = "https://github.com/Dakati/arithmetic-rs"
 repository = "https://github.com/Dakati/arithmetic-rs"
 license = "MIT"
 keywords = ["arithmetic", "coding", "entropy", "compression", "cabac"]
+categories = ["compression", "algorithms", "encoding"]
+readme = "README.md"
 
 [dependencies]
 bitbit = "0.2.0"
