@@ -1,6 +1,6 @@
 [package]
 name = "arcode"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Chris Burgess <cgburgess10@gmail.com>"]
 description = "An Arithmetic Coder (lossless entropy encoder)"
 edition = "2018"
