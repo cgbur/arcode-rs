@@ -10,6 +10,7 @@ license = "MIT"
 keywords = ["arithmetic", "coding", "entropy", "compression", "cabac"]
 categories = ["compression", "algorithms", "encoding"]
 readme = "README.md"
+exclude = ["example/*"]
 
 [dependencies]
 bitbit = "0.2.0"
