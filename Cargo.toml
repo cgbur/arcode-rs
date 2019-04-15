@@ -7,7 +7,7 @@ edition = "2018"
 homepage = "https://github.com/Dakati/arithmetic-rs"
 repository = "https://github.com/Dakati/arithmetic-rs"
 license = "MIT"
-keywords = ["arithmetic", "coding", "entropy", "compression", "cabac", "CAVLC"]
+keywords = ["arithmetic", "coding", "entropy", "compression", "cabac"]
 
 [dependencies]
 bitbit = "0.2.0"
