@@ -75,18 +75,22 @@
  use arithmetic_coder::util::source_model::SourceModel;
  use std::io::Cursor;
  use bitbit::BitWriter;
+ 
  let mut encoder = ArithmeticEncoder::new(30);
  let mut source_model = SourceModel::new(10, 9);
  let mut output = Cursor::new(vec![]);
  let mut out_writer = BitWriter::new(&mut output);
  let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
+ 
  for x in to_encode.iter() {
      encoder.encode(*x, &mut source_model, &mut out_writer).unwrap();
      source_model.update_symbol(*x);
  }
+ 
  encoder.encode(source_model.get_eof(), &source_model, &mut out_writer).unwrap();
  encoder.finish_encode(&mut out_writer).unwrap();
  out_writer.pad_to_byte().unwrap();
+ 
  assert_eq!(output.get_ref(), &[184, 96, 208]);
  ```
  ## Decode
@@ -95,22 +99,18 @@
  use arithmetic_coder::util::source_model::SourceModel;
  use bitbit::{BitReader, MSB};
  use arithmetic_coder::decode::decoder::ArithmeticDecoder;
+ 
  let input = Cursor::new(vec![184, 96, 208]);
  let mut source_model = SourceModel::new(10, 9);
  let mut output = Vec::new();
  let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
  let mut decoder = ArithmeticDecoder::new(30);
+ 
  while !decoder.is_finished() {
      let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
      source_model.update_symbol(sym);
      if sym != source_model.get_eof() { output.push(sym)};
  }
+ 
  assert_eq!(output, &[7, 2, 2, 2, 7]);
  ```
-
-
-pub mod util;
-pub mod encode;
-pub mod decode;
-
-pub extern crate bitbit;
