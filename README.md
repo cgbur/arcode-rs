@@ -57,7 +57,7 @@
  out of phase with the encoder you will be decoding nonsense.
 
  ```rust
- use arithmetic_coder::util::source_model::SourceModel;
+ use arcode::util::source_model::SourceModel;
  // create a new model that has symbols 0-256
  // 8 bit values + one EOF marker
  let mut model_with_eof = SourceModel::new(257, 256);
@@ -71,8 +71,8 @@
  ## Encode
  Encoding some simple input
  ```rust
- use arithmetic_coder::encode::encoder::ArithmeticEncoder;
- use arithmetic_coder::util::source_model::SourceModel;
+ use arcode::encode::encoder::ArithmeticEncoder;
+ use arcode::util::source_model::SourceModel;
  use std::io::Cursor;
  use bitbit::BitWriter;
  
@@ -96,9 +96,10 @@
  ## Decode
  ```rust
  use std::io::Cursor;
- use arithmetic_coder::util::source_model::SourceModel;
+ use 
+ r::util::source_model::SourceModel;
  use bitbit::{BitReader, MSB};
- use arithmetic_coder::decode::decoder::ArithmeticDecoder;
+ use arcode::decode::decoder::ArithmeticDecoder;
  
  let input = Cursor::new(vec![184, 96, 208]);
  let mut source_model = SourceModel::new(10, 9);
