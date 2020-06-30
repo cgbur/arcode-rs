@@ -81,10 +81,6 @@ impl SourceModel {
     (low as f64 / total, high as f64 / total)
   }
 
-  fn generate_symbol_vec(num_symbols: u32) -> Vec<u32> {
-    (0..num_symbols).collect()
-  }
-
   pub fn eof(&self) -> u32 {
     self.eof
   }
@@ -99,8 +95,6 @@ impl SourceModel {
   pub fn total_count(&self) -> u32 {
     self.total_count
   }
-
-
 }
 
 #[cfg(test)]

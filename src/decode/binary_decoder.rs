@@ -25,7 +25,7 @@ impl BinaryDecoder {
     }
   }
 
-  pub fn decode<R: Read, B: Bit>(&mut self, decoder: &mut ArithmeticDecoder, input: &mut BitReader<R, B>) -> Result<u32, Box<Error>> {
+  pub fn decode<R: Read, B: Bit>(&mut self, decoder: &mut ArithmeticDecoder, input: &mut BitReader<R, B>) -> Result<u32, Box<dyn Error>> {
     let mut value: u32 = 0;
     for model in self.models.iter_mut() {
       let sym = decoder.decode(model, input)?;

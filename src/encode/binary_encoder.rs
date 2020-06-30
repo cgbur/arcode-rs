@@ -21,9 +21,9 @@ impl BinaryEncoder {
   }
 
   pub fn encode<W: Write>(&mut self, encoder: &mut ArithmeticEncoder, output: &mut BitWriter<W>, value: u32)
-                          -> Result<(), Box<Error>> {
+                          -> Result<(), Box<dyn Error>> {
     for i in 0..self.models.len() {
-      let symbol = (value >> (self.models.len() - i - 1)) & 0x1;
+      let symbol = (value >> (self.models.len() - i - 1) as u32) & 0x1;
       encoder.encode(symbol, &self.models[i], output)?;
       self.models[i].update_symbol(symbol);
     }
