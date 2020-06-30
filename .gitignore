@@ -1,9 +1,4 @@
 /target
 **/*.rs.bk
 Cargo.lock
-.idea/arithmetic-rs.iml
-.idea/dictionaries/Dakati.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/workspace.xml
+.idea

@@ -1,5 +1,4 @@
 pub struct SourceModel {
-    symbols: Vec<u32>,
     counts: Vec<u32>,
     fenwick_counts: Vec<u32>,
     total_count: u32,
@@ -10,8 +9,7 @@ use fenwick::array::{update, prefix_sum};
 
 impl SourceModel {
     pub fn new(symbols_count: u32, eof_symbol: u32) -> Self {
-        let symbol_vector = Self::generate_symbol_vec(symbols_count);
-        let count_vector = vec![1; symbol_vector.len()];
+        let count_vector = vec![1; symbols_count as usize];
         let mut fenwick_counts = vec![0u32; count_vector.len()];
 
         for i in 0..count_vector.len() {
@@ -19,16 +17,14 @@ impl SourceModel {
         }
 
         Self {
-            total_count: symbol_vector.len() as u32,
+            total_count: symbols_count as u32,
             eof: eof_symbol,
-            symbols: symbol_vector,
             counts: count_vector,
             fenwick_counts,
         }
     }
     pub fn new_binary() -> Self {
         Self {
-            symbols: vec![0, 1],
             counts: vec![1, 1],
             fenwick_counts: vec![1, 2],
             total_count: 2,
@@ -43,7 +39,7 @@ impl SourceModel {
     }
 
     pub fn len(&self) -> u32 {
-        self.symbols.len() as u32
+        self.counts.len() as u32
     }
 
     pub fn get_high(&self, index: u32) -> f64 {
