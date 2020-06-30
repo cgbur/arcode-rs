@@ -33,7 +33,7 @@ impl ArithmeticDecoder {
         &mut BitReader<R, B>) -> Result<u32, Error> {
         if self.first_time {
             for _i in 0..self.precision {
-                self.input_buffer = (self.input_buffer << 1) | self.get_bit(bit_source)?;
+                self.input_buffer = (self.input_buffer << 1) | self.bit(bit_source)?;
             }
             self.first_time = false;
         }
@@ -53,7 +53,7 @@ impl ArithmeticDecoder {
                 sym_idx_low_high.1 = sym_idx_mid - 1;
             }
         }
-        if symbol == source_model.get_eof() {
+        if symbol == source_model.eof() {
             self.set_finished();
             return Ok(symbol);
         }
@@ -63,23 +63,23 @@ impl ArithmeticDecoder {
         while self.range.in_bottom_half() || self.range.in_upper_half() {
             if self.range.in_bottom_half() {
                 self.range.scale_bottom_half();
-                self.input_buffer = (2 * self.input_buffer) | self.get_bit(bit_source)?;
+                self.input_buffer = (2 * self.input_buffer) | self.bit(bit_source)?;
             } else if self.range.in_upper_half() {
                 self.range.scale_upper_half();
-                self.input_buffer = (2 * (self.input_buffer - self.range.get_half())) | self.get_bit(bit_source)?;
+                self.input_buffer = (2 * (self.input_buffer - self.range.half())) | self.bit(bit_source)?;
             }
         }
 
         while self.range.in_middle_half() {
             self.range.scale_middle_half();
-            self.input_buffer = (2 * (self.input_buffer - self.range.get_quarter())) | self.get_bit(bit_source)?;
+            self.input_buffer = (2 * (self.input_buffer - self.range.quarter())) | self.bit(bit_source)?;
         }
         Ok(symbol)
     }
 
 
-    fn get_bit<R: Read, B: Bit>(&mut self, source: &mut BitReader<R, B>)
-                                -> Result<u64, Error> {
+    fn bit<R: Read, B: Bit>(&mut self, source: &mut BitReader<R, B>)
+                            -> Result<u64, Error> {
         match source.read_bit() {
             Ok(res) => Ok(res as u64),
             Err(_e) => {
@@ -97,7 +97,7 @@ impl ArithmeticDecoder {
     pub fn set_finished(&mut self) {
         self.finished = true;
     }
-    pub fn is_finished(&self) -> bool { self.finished }
+    pub fn finished(&self) -> bool { self.finished }
 }
 
 #[cfg(test)]
@@ -115,10 +115,10 @@ mod tests {
         let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 
         let mut decoder = ArithmeticDecoder::new(30);
-        while !decoder.is_finished() {
+        while !decoder.finished() {
             let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
             source_model.update_symbol(sym);
-            if sym != source_model.get_eof() { output.push(sym) };
+            if sym != source_model.eof() { output.push(sym) };
         }
         assert_eq!(output, &[7, 2, 2, 2, 7]);
     }

@@ -52,7 +52,7 @@ impl Range {
     /// returns (low, high)
     pub fn calculate_range(&self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
         let new_width = self.high - self.low;
-        let probability = source_model.get_probability(symbol);
+        let probability = source_model.probability(symbol);
         ((self.low + (new_width as f64 * probability.0) as u64),
          (self.low + (new_width as f64 * probability.1) as u64))
     }
@@ -62,10 +62,10 @@ impl Range {
         self.high = low_high.1;
     }
 
-    pub fn get_half(&self) -> u64 {
+    pub fn half(&self) -> u64 {
         self.half
     }
-    pub fn get_quarter(&self) -> u64 {
+    pub fn quarter(&self) -> u64 {
         self.one_quarter_mark
     }
 }
@@ -83,8 +83,8 @@ mod tests {
         assert_eq!(range.half, range.high / 2);
         assert_eq!(range.three_quarter_mark, range.high - range.one_quarter_mark);
 
-        assert_eq!(range.half, range.get_half());
-        assert_eq!(range.one_quarter_mark, range.get_quarter());
+        assert_eq!(range.half, range.half());
+        assert_eq!(range.one_quarter_mark, range.quarter());
     }
 
     #[test]

@@ -82,7 +82,7 @@ mod test {
             encoder.encode(*x, &mut source_model, &mut out_writer).unwrap();
             source_model.update_symbol(*x);
         }
-        encoder.encode(source_model.get_eof(), &source_model, &mut out_writer).unwrap();
+        encoder.encode(source_model.eof(), &source_model, &mut out_writer).unwrap();
         encoder.finish_encode(&mut out_writer).unwrap();
         out_writer.pad_to_byte().unwrap();
         assert_eq!(output.get_ref(), &[184, 96, 208]);

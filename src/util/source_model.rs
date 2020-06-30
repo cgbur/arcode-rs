@@ -64,27 +64,29 @@ impl SourceModel {
         self.counts.len() as u32
     }
 
-    pub fn get_high(&self, index: u32) -> f64 {
+    pub fn high(&self, index: u32) -> f64 {
         let high: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize);
         high as f64 / self.total_count as f64
     }
 
-    pub fn get_low(&self, index: u32) -> f64 {
+    pub fn low(&self, index: u32) -> f64 {
         let low: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize) - self.counts[index as usize];
         low as f64 / self.total_count as f64
     }
 
-    pub fn get_probability(&self, symbol: u32) -> (f64, f64) {
+    pub fn probability(&self, symbol: u32) -> (f64, f64) {
         let total = self.total_count as f64;
 
         let high = prefix_sum(&self.fenwick_counts, symbol as usize);
         let low = high - self.counts[symbol as usize];
         (low as f64 / total, high as f64 / total)
     }
+
     fn generate_symbol_vec(num_symbols: u32) -> Vec<u32> {
         (0..num_symbols).collect()
     }
-    pub fn get_eof(&self) -> u32 {
+
+    pub fn eof(&self) -> u32 {
         self.eof
     }
 }
@@ -96,31 +98,31 @@ mod tests {
     #[test]
     fn constructor() {
         let model = SourceModel::new_eof(4, 3);
-        assert_eq!(3, model.get_eof());
-        assert_eq!(model.get_probability(0), (0.0, 0.25));
-        assert_eq!(model.get_probability(1), (0.25, 0.5));
-        assert_eq!(model.get_probability(2), (0.5, 0.75));
-        assert_eq!(model.get_probability(3), (0.75, 1.0));
+        assert_eq!(3, model.eof());
+        assert_eq!(model.probability(0), (0.0, 0.25));
+        assert_eq!(model.probability(1), (0.25, 0.5));
+        assert_eq!(model.probability(2), (0.5, 0.75));
+        assert_eq!(model.probability(3), (0.75, 1.0));
     }
 
     #[test]
     fn constructor_binary() {
         let binary = SourceModel::new_binary();
         let model = SourceModel::new(2);
-        assert_eq!(binary.get_eof(), model.get_eof());
-        assert_eq!(binary.get_probability(0), model.get_probability(0));
-        assert_eq!(binary.get_probability(1), model.get_probability(1));
+        assert_eq!(binary.eof(), model.eof());
+        assert_eq!(binary.probability(0), model.probability(0));
+        assert_eq!(binary.probability(1), model.probability(1));
     }
 
     #[test]
     fn constructor_from_counts() {
         let mut model = SourceModel::new_eof(4, 3);
         let counts_model = SourceModel::from_counts(vec![1;4], 3);
-        assert_eq!(3, model.get_eof());
-        assert_eq!(model.get_probability(0), counts_model.get_probability(0));
-        assert_eq!(model.get_probability(1), counts_model.get_probability(1));
-        assert_eq!(model.get_probability(2), counts_model.get_probability(2));
-        assert_eq!(model.get_probability(3), counts_model.get_probability(3));
+        assert_eq!(3, model.eof());
+        assert_eq!(model.probability(0), counts_model.probability(0));
+        assert_eq!(model.probability(1), counts_model.probability(1));
+        assert_eq!(model.probability(2), counts_model.probability(2));
+        assert_eq!(model.probability(3), counts_model.probability(3));
 
         model.update_symbol(0);
         model.update_symbol(0);
@@ -129,17 +131,17 @@ mod tests {
         model.update_symbol(2);
 
         let counts_model = SourceModel::from_counts(vec![4, 1, 3, 1], 3);
-        assert_eq!(model.get_probability(0), counts_model.get_probability(0));
-        assert_eq!(model.get_probability(1), counts_model.get_probability(1));
-        assert_eq!(model.get_probability(2), counts_model.get_probability(2));
-        assert_eq!(model.get_probability(3), counts_model.get_probability(3));
+        assert_eq!(model.probability(0), counts_model.probability(0));
+        assert_eq!(model.probability(1), counts_model.probability(1));
+        assert_eq!(model.probability(2), counts_model.probability(2));
+        assert_eq!(model.probability(3), counts_model.probability(3));
     }
 
     #[test]
     fn probability_min() {
         let model = SourceModel::new_eof(1000, 3);
-        assert_eq!(model.get_probability(0),
-                   (model.get_low(0), model.get_high(0)));
+        assert_eq!(model.probability(0),
+                   (model.low(0), model.high(0)));
     }
 
     #[test]
@@ -147,8 +149,8 @@ mod tests {
         let count = 1_000;
         let model = SourceModel::new_eof(count + 1, 3);
 
-        assert_eq!(model.get_probability(count),
-                   (model.get_low(count), model.get_high(count)));
+        assert_eq!(model.probability(count),
+                   (model.low(count), model.high(count)));
     }
 
     #[test]
@@ -161,9 +163,10 @@ mod tests {
         model.update_symbol(1);
         model.update_symbol(3);
 
-        assert_eq!(model.get_probability(0), (0.0, 0.1));
-        assert_eq!(model.get_probability(1), (0.1, 0.3));
-        assert_eq!(model.get_probability(2), (0.3, 0.7));
-        assert_eq!(model.get_probability(3), (0.7, 1.0));
+        assert_eq!(model.probability(0), (0.0, 0.1));
+        assert_eq!(model.probability(1), (0.1, 0.3));
+        assert_eq!(model.probability(2), (0.3, 0.7));
+        assert_eq!(model.probability(3), (0.7, 1.0));
     }
+
 }

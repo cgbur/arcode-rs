@@ -87,7 +87,7 @@
 //!     source_model.update_symbol(*x);
 //! }
 //!
-//! encoder.encode(source_model.get_eof(), &source_model, &mut out_writer).unwrap();
+//! encoder.encode(source_model.eof(), &source_model, &mut out_writer).unwrap();
 //! encoder.finish_encode(&mut out_writer).unwrap();
 //! out_writer.pad_to_byte().unwrap();
 //!
@@ -106,10 +106,10 @@
 //! let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 //! let mut decoder = ArithmeticDecoder::new(30);
 //!
-//! while !decoder.is_finished() {
+//! while !decoder.finished() {
 //!     let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
 //!     source_model.update_symbol(sym);
-//!     if sym != source_model.get_eof() { output.push(sym)};
+//!     if sym != source_model.eof() { output.push(sym)};
 //! }
 //!
 //! assert_eq!(output, &[7, 2, 2, 2, 7]);
