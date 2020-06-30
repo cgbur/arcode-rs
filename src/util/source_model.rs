@@ -88,6 +88,19 @@ impl SourceModel {
   pub fn eof(&self) -> u32 {
     self.eof
   }
+
+  pub fn counts(&self) -> &[u32] {
+    self.counts.as_slice()
+  }
+
+  pub fn fenwick_counts(&self) -> &[u32] {
+    self.fenwick_counts.as_slice()
+  }
+  pub fn total_count(&self) -> u32 {
+    self.total_count
+  }
+
+
 }
 
 #[cfg(test)]
