@@ -74,7 +74,7 @@ mod test {
     #[test]
     fn e2e() {
         let mut encoder = ArithmeticEncoder::new(30);
-        let mut source_model = SourceModel::new(10, 9);
+        let mut source_model = SourceModel::new_eof(10, 9);
         let mut output = Cursor::new(vec![]);
         let mut out_writer = BitWriter::new(&mut output);
         let to_encode: [u32; 5] = [7, 2, 2, 2, 7];

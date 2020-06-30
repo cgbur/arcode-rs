@@ -8,7 +8,7 @@ pub struct SourceModel {
 use fenwick::array::{update, prefix_sum};
 
 impl SourceModel {
-    pub fn new(symbols_count: u32, eof_symbol: u32) -> Self {
+    pub fn new_eof(symbols_count: u32, eof_symbol: u32) -> Self {
         let count_vector = vec![1; symbols_count as usize];
         let mut fenwick_counts = vec![0u32; count_vector.len()];
 
@@ -23,12 +23,34 @@ impl SourceModel {
             fenwick_counts,
         }
     }
+
+    pub fn new(symbols_count: u32) -> Self {
+        Self::new_eof(symbols_count, symbols_count + 1)
+    }
+
     pub fn new_binary() -> Self {
         Self {
             counts: vec![1, 1],
             fenwick_counts: vec![1, 2],
             total_count: 2,
             eof: 3,
+        }
+    }
+
+    pub fn from_counts(counts: Vec<u32>, eof: u32) -> Self {
+
+        let mut fenwick_counts = vec![0u32; counts.len()];
+
+        for i in 0..counts.len() {
+            update(&mut fenwick_counts, i, counts[i]);
+        }
+
+        let total_count = counts.iter().sum();
+        Self {
+            counts,
+            fenwick_counts,
+            total_count,
+            eof
         }
     }
 
@@ -73,7 +95,7 @@ mod tests {
 
     #[test]
     fn constructor() {
-        let model = SourceModel::new(4, 3);
+        let model = SourceModel::new_eof(4, 3);
         assert_eq!(3, model.get_eof());
         assert_eq!(model.get_probability(0), (0.0, 0.25));
         assert_eq!(model.get_probability(1), (0.25, 0.5));
@@ -84,15 +106,38 @@ mod tests {
     #[test]
     fn constructor_binary() {
         let binary = SourceModel::new_binary();
-        let model = SourceModel::new(2, 3);
+        let model = SourceModel::new(2);
         assert_eq!(binary.get_eof(), model.get_eof());
         assert_eq!(binary.get_probability(0), model.get_probability(0));
         assert_eq!(binary.get_probability(1), model.get_probability(1));
     }
 
     #[test]
+    fn constructor_from_counts() {
+        let mut model = SourceModel::new_eof(4, 3);
+        let counts_model = SourceModel::from_counts(vec![1;4], 3);
+        assert_eq!(3, model.get_eof());
+        assert_eq!(model.get_probability(0), counts_model.get_probability(0));
+        assert_eq!(model.get_probability(1), counts_model.get_probability(1));
+        assert_eq!(model.get_probability(2), counts_model.get_probability(2));
+        assert_eq!(model.get_probability(3), counts_model.get_probability(3));
+
+        model.update_symbol(0);
+        model.update_symbol(0);
+        model.update_symbol(0);
+        model.update_symbol(2);
+        model.update_symbol(2);
+
+        let counts_model = SourceModel::from_counts(vec![4, 1, 3, 1], 3);
+        assert_eq!(model.get_probability(0), counts_model.get_probability(0));
+        assert_eq!(model.get_probability(1), counts_model.get_probability(1));
+        assert_eq!(model.get_probability(2), counts_model.get_probability(2));
+        assert_eq!(model.get_probability(3), counts_model.get_probability(3));
+    }
+
+    #[test]
     fn probability_min() {
-        let model = SourceModel::new(1000, 3);
+        let model = SourceModel::new_eof(1000, 3);
         assert_eq!(model.get_probability(0),
                    (model.get_low(0), model.get_high(0)));
     }
@@ -100,7 +145,7 @@ mod tests {
     #[test]
     fn probability_high() {
         let count = 1_000;
-        let model = SourceModel::new(count + 1, 3);
+        let model = SourceModel::new_eof(count + 1, 3);
 
         assert_eq!(model.get_probability(count),
                    (model.get_low(count), model.get_high(count)));
@@ -108,7 +153,7 @@ mod tests {
 
     #[test]
     fn update_symbols() {
-        let mut model = SourceModel::new(4, 3);
+        let mut model = SourceModel::new_eof(4, 3);
         model.update_symbol(2);
         model.update_symbol(2);
         model.update_symbol(2);

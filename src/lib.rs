@@ -60,10 +60,10 @@
 //! use arcode::util::source_model::SourceModel;
 //! // create a new model that has symbols 0-256
 //! // 8 bit values + one EOF marker
-//! let mut model_with_eof = SourceModel::new(257, 256);
+//! let mut model_with_eof = SourceModel::new_eof(257, 256);
 //! // model for 8 bit 0 - 255, if we arent using
 //! // the EOF flag set it to anything outside the range.
-//! let model_without_eof = SourceModel::new(256, 9999);
+//! let model_without_eof = SourceModel::new_eof(256, 9999);
 //!
 //! // update the probability of symbol 4.
 //! model_with_eof.update_symbol(4);
@@ -77,7 +77,7 @@
 //! use bitbit::BitWriter;
 //!
 //! let mut encoder = ArithmeticEncoder::new(30);
-//! let mut source_model = SourceModel::new(10, 9);
+//! let mut source_model = SourceModel::new_eof(10, 9);
 //! let mut output = Cursor::new(vec![]);
 //! let mut out_writer = BitWriter::new(&mut output);
 //! let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
@@ -101,7 +101,7 @@
 //! use arcode::decode::decoder::ArithmeticDecoder;
 //!
 //! let input = Cursor::new(vec![184, 96, 208]);
-//! let mut source_model = SourceModel::new(10, 9);
+//! let mut source_model = SourceModel::new_eof(10, 9);
 //! let mut output = Vec::new();
 //! let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 //! let mut decoder = ArithmeticDecoder::new(30);

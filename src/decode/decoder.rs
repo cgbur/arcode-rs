@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn e2e() {
         let input = Cursor::new(vec![184, 96, 208]);
-        let mut source_model = SourceModel::new(10, 9);
+        let mut source_model = SourceModel::new_eof(10, 9);
         let mut output = Vec::new();
         let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 
