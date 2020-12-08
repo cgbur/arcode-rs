@@ -28,6 +28,18 @@ impl SourceModel {
     Self::new_eof(symbols_count, symbols_count + 1)
   }
 
+  pub fn from_values(counts: Vec<u32>,
+                     fenwick_counts: Vec<u32>,
+                     total_count: u32,
+                     eof: u32, ) -> Self {
+    Self {
+      counts,
+      fenwick_counts,
+      total_count,
+      eof,
+    }
+  }
+
   pub fn new_binary() -> Self {
     Self {
       counts: vec![1, 1],
@@ -85,12 +97,12 @@ impl SourceModel {
     self.eof
   }
 
-  pub fn counts(&self) -> &[u32] {
-    self.counts.as_slice()
+  pub fn counts(&self) -> &Vec<u32> {
+    &self.counts
   }
 
-  pub fn fenwick_counts(&self) -> &[u32] {
-    self.fenwick_counts.as_slice()
+  pub fn fenwick_counts(&self) -> &Vec<u32> {
+    &self.fenwick_counts
   }
   pub fn total_count(&self) -> u32 {
     self.total_count
