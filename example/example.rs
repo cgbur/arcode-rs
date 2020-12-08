@@ -7,6 +7,8 @@ use std::error::Error;
 use arcode::util::source_model::SourceModel;
 use arcode::encode::encoder::ArithmeticEncoder;
 use arcode::decode::decoder::ArithmeticDecoder;
+use arcode::util::source_model_builder::SourceModelBuilder;
+use arcode::util::source_model_builder::EOFKind::End;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -33,7 +35,11 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
 
         let mut models = Vec::with_capacity(num_symbols);
         for _i in 0..num_symbols {
-            models.push(SourceModel::new(num_symbols as u32, 256));
+            // models.push(SourceModel::new(num_symbols as u32, 256));
+            models.push(SourceModelBuilder::new()
+                .num_symbols(num_symbols as u32)
+                .eof(End)
+                .build());
         }
         let input_file = File::open(input_path)?;
         let mut buffer_input = BufReader::new(input_file);
@@ -54,7 +60,7 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
             current_model.update_symbol(symbol);
             current_model = &mut models[symbol as usize];
         }
-        encoder.encode(current_model.get_eof(), current_model, &mut out_writer)?;
+        encoder.encode(current_model.eof(), current_model, &mut out_writer)?;
         encoder.finish_encode( &mut out_writer)?;
         out_writer.pad_to_byte()?;
         let finished = encode_start.elapsed().as_millis();
@@ -78,7 +84,10 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
 
         let mut models = Vec::with_capacity(num_symbols);
         for _i in 0..num_symbols {
-            models.push(SourceModel::new(num_symbols as u32, 256));
+            models.push(SourceModelBuilder::new()
+                .num_symbols(num_symbols as u32)
+                .eof(End)
+                .build());
         }
 
         let mut x = 0;
@@ -86,12 +95,12 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
 
         let mut current_model = &mut models[0];
 
-        while !decoder.is_finished() {
+        while !decoder.finished() {
             if x % byte_break == 0 {
                 println!("{:.1}%", (x as f64 / num_bytes as f64) * 100.0);
             }
             let sym = decoder.decode(current_model, &mut input)?;
-            if sym != current_model.get_eof() { out_writer.write_byte(sym as u8)?; }
+            if sym != current_model.eof() { out_writer.write_byte(sym as u8)?; }
             current_model.update_symbol(sym);
             current_model = &mut models[sym as usize];
             x += 1;

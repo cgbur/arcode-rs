@@ -1,6 +1,6 @@
 [package]
 name = "arcode"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Chris Burgess <cgburgess10@gmail.com>"]
 description = "An Arithmetic Coder (lossless entropy encoder)"
 edition = "2018"
@@ -19,6 +19,6 @@ binary = []
 bitbit = "0.2.0"
 fenwick = "0.2.0"
 
-#[[bin]]
-#name = "example-bin"
-#path = "example/example.rs"
+[[bin]]
+name = "example-bin"
+path = "example/example.rs"
