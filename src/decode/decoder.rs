@@ -103,14 +103,15 @@ impl ArithmeticDecoder {
 #[cfg(test)]
 mod tests {
   use std::io::Cursor;
-  use crate::util::source_model::SourceModel;
   use bitbit::{BitReader, MSB};
   use crate::decode::decoder::ArithmeticDecoder;
+  use crate::util::source_model_builder::{SourceModelBuilder, EOFKind};
 
   #[test]
   fn e2e() {
     let input = Cursor::new(vec![184, 96, 208]);
-    let mut source_model = SourceModel::new_eof(10, 9);
+    let mut source_model = SourceModelBuilder::new()
+        .num_symbols(10).eof(EOFKind::End).build();
     let mut output = Vec::new();
     let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 

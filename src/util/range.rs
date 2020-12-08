@@ -73,7 +73,7 @@ impl Range {
 #[cfg(test)]
 mod tests {
   use crate::util::range::Range;
-  use crate::util::source_model::SourceModel;
+  use crate::util::source_model_builder::SourceModelBuilder;
 
   #[test]
   fn constructor() {
@@ -89,7 +89,10 @@ mod tests {
 
   #[test]
   fn calculate_range() {
-    let model = SourceModel::new_eof(3, 3);
+
+    let model = SourceModelBuilder::new()
+        .num_symbols(3).build();
+
     let range = Range::new(8);
     assert_eq!(range.calculate_range(0, &model), (0, 85));
     assert_eq!(range.calculate_range(1, &model), (85, 170));
@@ -98,7 +101,9 @@ mod tests {
 
   #[test]
   fn test_range() {
-    let model = SourceModel::new_eof(3, 3);
+    let model = SourceModelBuilder::new()
+        .num_symbols(3).build();
+
     let mut range = Range::new(8);
     range.update_range(range.calculate_range(0, &model));
     assert_eq!(range.in_bottom_half(), true);
@@ -106,7 +111,9 @@ mod tests {
     assert_eq!(range.in_middle_half(), false);
     assert_eq!(range.in_bottom_quarter(), true);
 
-    let model = SourceModel::new_eof(3, 3);
+    let model = SourceModelBuilder::new()
+        .num_symbols(3).build();
+
     let mut range = Range::new(8);
     range.update_range(range.calculate_range(2, &model));
     assert_eq!(range.in_bottom_half(), false);
@@ -114,7 +121,9 @@ mod tests {
     assert_eq!(range.in_middle_half(), false);
     assert_eq!(range.in_bottom_quarter(), false);
 
-    let model = SourceModel::new_eof(100, 3);
+    let model = SourceModelBuilder::new()
+        .num_symbols(100).build();
+
     let mut range = Range::new(12);
     range.update_range(range.calculate_range(50, &model));
     assert_eq!(range.in_bottom_half(), false);

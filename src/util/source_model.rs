@@ -1,3 +1,7 @@
+/// Symbol table for the encoder/decoder.
+/// Used to store the probabilities as a vector of counts
+/// (number of occurrences). Uniform would be every symbol has
+/// a count of 0.
 pub struct SourceModel {
   counts: Vec<u32>,
   fenwick_counts: Vec<u32>,
@@ -8,55 +12,13 @@ pub struct SourceModel {
 use fenwick::array::{update, prefix_sum};
 
 impl SourceModel {
-  pub fn new_eof(symbols_count: u32, eof_symbol: u32) -> Self {
-    let count_vector = vec![1; symbols_count as usize];
-    let mut fenwick_counts = vec![0u32; count_vector.len()];
-
-    for i in 0..count_vector.len() {
-      update(&mut fenwick_counts, i, 1);
-    }
-
-    Self {
-      total_count: symbols_count as u32,
-      eof: eof_symbol,
-      counts: count_vector,
-      fenwick_counts,
-    }
-  }
-
-  pub fn new(symbols_count: u32) -> Self {
-    Self::new_eof(symbols_count, symbols_count + 1)
-  }
-
+  /// For loading a saved model. Use the
+  /// [SourceModelBuilder](crate::util::source_model_builder) for
+  /// more options.
   pub fn from_values(counts: Vec<u32>,
                      fenwick_counts: Vec<u32>,
                      total_count: u32,
                      eof: u32, ) -> Self {
-    Self {
-      counts,
-      fenwick_counts,
-      total_count,
-      eof,
-    }
-  }
-
-  pub fn new_binary() -> Self {
-    Self {
-      counts: vec![1, 1],
-      fenwick_counts: vec![1, 2],
-      total_count: 2,
-      eof: 3,
-    }
-  }
-
-  pub fn from_counts(counts: Vec<u32>, eof: u32) -> Self {
-    let mut fenwick_counts = vec![0u32; counts.len()];
-
-    for i in 0..counts.len() {
-      update(&mut fenwick_counts, i, counts[i]);
-    }
-
-    let total_count = counts.iter().sum();
     Self {
       counts,
       fenwick_counts,
@@ -111,11 +73,16 @@ impl SourceModel {
 
 #[cfg(test)]
 mod tests {
-  use crate::util::source_model::SourceModel;
+  use crate::util::source_model_builder::SourceModelBuilder;
+  use crate::util::source_model_builder::EOFKind::End;
 
   #[test]
   fn constructor() {
-    let model = SourceModel::new_eof(4, 3);
+    let model = SourceModelBuilder::new()
+        .num_symbols(4)
+        .eof(End)
+        .build();
+
     assert_eq!(3, model.eof());
     assert_eq!(model.probability(0), (0.0, 0.25));
     assert_eq!(model.probability(1), (0.25, 0.5));
@@ -124,9 +91,20 @@ mod tests {
   }
 
   #[test]
+  fn constructor_new() {
+    let model = SourceModelBuilder::new().num_symbols(4).build();
+    assert_eq!(4, model.eof());
+    assert_eq!(model.probability(0), (0.0, 0.25));
+    assert_eq!(model.probability(1), (0.25, 0.5));
+    assert_eq!(model.probability(2), (0.5, 0.75));
+    assert_eq!(model.probability(3), (0.75, 1.0));
+  }
+
+  #[test]
   fn constructor_binary() {
-    let binary = SourceModel::new_binary();
-    let model = SourceModel::new(2);
+    let binary = SourceModelBuilder::new().binary().build();
+    let model = SourceModelBuilder::new().num_symbols(2).build();
+
     assert_eq!(binary.eof(), model.eof());
     assert_eq!(binary.probability(0), model.probability(0));
     assert_eq!(binary.probability(1), model.probability(1));
@@ -134,8 +112,16 @@ mod tests {
 
   #[test]
   fn constructor_from_counts() {
-    let mut model = SourceModel::new_eof(4, 3);
-    let counts_model = SourceModel::from_counts(vec![1; 4], 3);
+    let mut model = SourceModelBuilder::new()
+        .num_symbols(4)
+        .eof(End)
+        .build();
+
+    let counts_model = SourceModelBuilder::new()
+        .counts(vec![1;4])
+        .eof(End)
+        .build();
+
     assert_eq!(3, model.eof());
     assert_eq!(model.probability(0), counts_model.probability(0));
     assert_eq!(model.probability(1), counts_model.probability(1));
@@ -148,7 +134,10 @@ mod tests {
     model.update_symbol(2);
     model.update_symbol(2);
 
-    let counts_model = SourceModel::from_counts(vec![4, 1, 3, 1], 3);
+    let counts_model = SourceModelBuilder::new()
+        .counts(vec![4, 1, 3, 1])
+        .eof(End)
+        .build();
     assert_eq!(model.probability(0), counts_model.probability(0));
     assert_eq!(model.probability(1), counts_model.probability(1));
     assert_eq!(model.probability(2), counts_model.probability(2));
@@ -156,8 +145,44 @@ mod tests {
   }
 
   #[test]
+  fn constructor_from_pdf() {
+    let mut model = SourceModelBuilder::new()
+        .num_symbols(4)
+        .eof(End)
+        .build();
+
+    let pdf_model = SourceModelBuilder::new()
+        .pdf(vec![0.25f32; 4]).eof(End).build();
+
+
+    assert_eq!(3, model.eof());
+    assert_eq!(model.probability(0), pdf_model.probability(0));
+    assert_eq!(model.probability(1), pdf_model.probability(1));
+    assert_eq!(model.probability(2), pdf_model.probability(2));
+    assert_eq!(model.probability(3), pdf_model.probability(3));
+
+    model.update_symbol(0);
+    model.update_symbol(0);
+    model.update_symbol(0);
+    model.update_symbol(1);
+    model.update_symbol(2);
+    model.update_symbol(2);
+
+
+    let pdf_model = SourceModelBuilder::new()
+        .pdf(vec![0.4, 0.2, 0.3, 0.1]).eof(End).build();
+
+    assert_eq!(model.probability(0), pdf_model.probability(0));
+    assert_eq!(model.probability(1), pdf_model.probability(1));
+    assert_eq!(model.probability(2), pdf_model.probability(2));
+    assert_eq!(model.probability(3), pdf_model.probability(3));
+  }
+
+  #[test]
   fn probability_min() {
-    let model = SourceModel::new_eof(1000, 3);
+    let model = SourceModelBuilder::new()
+        .num_symbols(2315)
+        .build();
     assert_eq!(model.probability(0),
                (model.low(0), model.high(0)));
   }
@@ -165,7 +190,10 @@ mod tests {
   #[test]
   fn probability_high() {
     let count = 1_000;
-    let model = SourceModel::new_eof(count + 1, 3);
+
+    let model = SourceModelBuilder::new()
+        .num_symbols(count + 1)
+        .build();
 
     assert_eq!(model.probability(count),
                (model.low(count), model.high(count)));
@@ -173,7 +201,11 @@ mod tests {
 
   #[test]
   fn update_symbols() {
-    let mut model = SourceModel::new_eof(4, 3);
+    let mut model = SourceModelBuilder::new()
+        .num_symbols(4)
+        .eof(End)
+        .build();
+
     model.update_symbol(2);
     model.update_symbol(2);
     model.update_symbol(2);
