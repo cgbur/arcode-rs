@@ -19,6 +19,6 @@ binary = []
 bitbit = "0.2.0"
 fenwick = "0.2.0"
 
-[[bin]]
-name = "example-bin"
-path = "example/example.rs"
+#[[bin]]
+#name = "example-bin"
+#path = "example/example.rs"
