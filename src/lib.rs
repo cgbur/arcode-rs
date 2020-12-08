@@ -120,4 +120,7 @@ pub mod util;
 pub mod encode;
 pub mod decode;
 
+#[cfg(feature = "binary")]
+pub mod binary;
+
 pub extern crate bitbit;

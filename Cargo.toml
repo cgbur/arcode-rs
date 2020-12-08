@@ -12,6 +12,9 @@ categories = ["compression", "algorithms", "encoding"]
 readme = "README.md"
 exclude = ["example/*"]
 
+[features]
+binary = []
+
 [dependencies]
 bitbit = "0.2.0"
 fenwick = "0.2.0"

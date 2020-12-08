@@ -3,5 +3,3 @@
 
 /// Contains the structs for the main decoder.
 pub mod decoder;
-/// Contains a modification of the decoder that works on a per bit level of symbols.
-pub mod binary_decoder;
