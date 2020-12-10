@@ -57,11 +57,6 @@ impl SourceModelBuilder {
   }
 
   pub fn num_symbols(&mut self, count: u32) -> &mut Self {
-    if self.counts.is_some() {
-      assert_eq!(self.num_symbols.unwrap(), self.counts.as_ref().unwrap().len() as u32,
-                 "Attempted to set num symbols that is not equal to counts.len");
-    }
-
     self.num_symbols = Some(count);
     self
   }
@@ -69,13 +64,6 @@ impl SourceModelBuilder {
   /// Constructs new model if you already have counts present.
   /// Implied number of symbols from length of `counts`.
   pub fn counts(&mut self, counts: Vec<u32>) -> &mut Self {
-    if self.num_symbols.is_some() {
-      assert_eq!(self.num_symbols.unwrap(), counts.len() as u32,
-                 "Attempted to set counts vec that had different length than previously set num_symbols");
-    }
-
-    assert!(counts.len() > 0);
-
     self.counts = Some(counts.clone());
     self
   }
@@ -94,12 +82,8 @@ impl SourceModelBuilder {
   ///
   /// Therefore besides determining the accuracy, scale is
   /// used to determine the elasticity of the model.
-  ///
-  /// This method will not panic on negative values or values
-  /// greater than 1.0. They dont cause mathematical errors so
-  /// its on the user to use probabilities correctly.
-  pub fn scale(&mut self, scale: u32) -> &mut Self {
-    assert!(scale >= 10);
+  pub fn scale(&mut self, mut scale: u32) -> &mut Self {
+    if scale < 10 { scale = 10 }
     self.scale = Some(scale);
     self
   }
@@ -109,6 +93,9 @@ impl SourceModelBuilder {
   /// of symbols (min 10). Defaults scale to length of pdf.
   ///
   /// *Open to suggestions for default scale*
+  /// This method will not panic on negative values or values
+  ///  greater than 1.0. They dont cause mathematical errors so
+  ///  its on the user to use probabilities correctly.
   pub fn pdf(&mut self, pdf: Vec<f32>) -> &mut Self {
     self.pdf = Some(pdf);
     self
