@@ -29,6 +29,8 @@ pub enum EOFKind {
 ///   - eof?
 ///   - scale?
 /// - symbol count
+//    - eof?
+/// - symbol count
 ///   - eof?
 /// - binary - default but can also be explicit
 ///
@@ -38,6 +40,7 @@ pub enum EOFKind {
 pub struct SourceModelBuilder {
   counts: Option<Vec<u32>>,
   num_symbols: Option<u32>,
+  num_bits: Option<u32>,
   eof: Option<EOFKind>,
   pdf: Option<Vec<f32>>,
   scale: Option<u32>,
@@ -49,6 +52,7 @@ impl SourceModelBuilder {
     Self {
       counts: None,
       num_symbols: None,
+      num_bits: None,
       eof: None,
       pdf: None,
       scale: None,
@@ -60,6 +64,12 @@ impl SourceModelBuilder {
     self.num_symbols = Some(count);
     self
   }
+
+  pub fn num_bits(&mut self, size: u32) -> &mut Self {
+    self.num_bits = Some(size);
+    self
+  }
+
 
   /// Constructs new model if you already have counts present.
   /// Implied number of symbols from length of `counts`.
@@ -119,10 +129,13 @@ impl SourceModelBuilder {
               .map(|p| max((p * scale) as i32, 1))
               .map(|c| c as u32).collect()
         }
-        None => match self.num_symbols {
-          Some(num_symbols) => vec![1; num_symbols as usize],
-          None => match self.binary {
-            _ => vec![1, 1],
+        None => match self.num_bits {
+          Some(num_bits) => vec![1; 1 << num_bits as usize],
+          None => match self.num_symbols {
+            Some(num_symbols) => vec![1; num_symbols as usize],
+            None => match self.binary {
+              _ => vec![1, 1],
+            }
           }
         }
       }
@@ -175,6 +188,20 @@ mod tests {
   #[test]
   fn num_symbols() {
     let sut = SourceModelBuilder::new().num_symbols(4).build();
+
+    let reference = SourceModel::from_values(
+      vec![1, 1, 1, 1],
+      vec![1, 2, 1, 4],
+      4,
+      4,
+    );
+
+    model_eq(&reference, &sut);
+  }
+
+  #[test]
+  fn num_bits() {
+    let sut = SourceModelBuilder::new().num_bits(2).build();
 
     let reference = SourceModel::from_values(
       vec![1, 1, 1, 1],
