@@ -4,6 +4,7 @@ use crate::util::source_model::SourceModel;
 use crate::encode::encoder::ArithmeticEncoder;
 use bitbit::reader::Bit;
 use crate::decode::decoder::ArithmeticDecoder;
+use crate::util::source_model_builder::SourceModelBuilder;
 
 pub struct BinaryCoder {
   models: Vec<SourceModel>
@@ -18,7 +19,7 @@ impl BinaryCoder {
   pub fn new(bit_width: u32) -> Self {
     let mut models: Vec<SourceModel> = Vec::with_capacity(bit_width as usize);
     for _i in 0..bit_width {
-      models.push(SourceModel::new_binary());
+      models.push(SourceModelBuilder::new().binary().build());
     }
     Self {
       models
