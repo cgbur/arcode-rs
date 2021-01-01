@@ -58,21 +58,22 @@ impl Range {
   /// returns (low, high)
   pub fn calculate_range(&self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
     let new_width = self.high - self.low;
-    let probability = source_model.probability(symbol);
+    let (low, high) = source_model.probability(symbol);
     (
-      (self.low + (new_width as f64 * probability.0) as u64),
-      (self.low + (new_width as f64 * probability.1) as u64),
+      (self.low + (new_width as f64 * low) as u64),
+      (self.low + (new_width as f64 * high) as u64),
     )
   }
 
-  pub fn update_range(&mut self, low_high: (u64, u64)) {
-    self.low = low_high.0;
-    self.high = low_high.1;
+  pub fn update_range(&mut self, (low, high): (u64, u64)) {
+    self.low = low;
+    self.high = high;
   }
 
   pub fn half(&self) -> u64 {
     self.half
   }
+
   pub fn quarter(&self) -> u64 {
     self.one_quarter_mark
   }
