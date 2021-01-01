@@ -41,7 +41,7 @@ impl ArithmeticDecoder {
 
     let symbol: u32;
     let mut low_high: (u64, u64);
-    let mut sym_idx_low_high = (0, source_model.len());
+    let mut sym_idx_low_high = (0, source_model.num_symbols());
     loop {
       let sym_idx_mid = (sym_idx_low_high.0 + sym_idx_low_high.1) / 2;
       low_high = self.range.calculate_range(sym_idx_mid, source_model);

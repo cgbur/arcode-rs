@@ -7,6 +7,7 @@ pub struct SourceModel {
   fenwick_counts: Vec<u32>,
   total_count: u32,
   eof: u32,
+  num_symbols: u32,
 }
 
 use fenwick::array::{prefix_sum, update};
@@ -22,6 +23,7 @@ impl SourceModel {
     eof: u32,
   ) -> Self {
     Self {
+      num_symbols: counts.len() as u32,
       counts,
       fenwick_counts,
       total_count,
@@ -35,8 +37,8 @@ impl SourceModel {
     update(&mut self.fenwick_counts, symbol as usize, 1);
   }
 
-  pub fn len(&self) -> u32 {
-    self.counts.len() as u32
+  pub fn num_symbols(&self) -> u32 {
+    self.num_symbols
   }
 
   pub fn high(&self, index: u32) -> f64 {

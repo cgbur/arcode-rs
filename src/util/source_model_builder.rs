@@ -47,6 +47,12 @@ pub struct SourceModelBuilder {
   binary: bool,
 }
 
+impl Default for SourceModelBuilder {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl SourceModelBuilder {
   pub fn new() -> Self {
     Self {
@@ -73,7 +79,7 @@ impl SourceModelBuilder {
   /// Constructs new model if you already have counts present.
   /// Implied number of symbols from length of `counts`.
   pub fn counts(&mut self, counts: Vec<u32>) -> &mut Self {
-    self.counts = Some(counts.clone());
+    self.counts = Some(counts);
     self
   }
 
@@ -123,7 +129,7 @@ impl SourceModelBuilder {
       Some(counts) => counts.clone(),
       None => match &self.pdf {
         Some(pdf) => {
-          let scale = self.scale.unwrap_or(max(pdf.len() as u32, 10));
+          let scale = self.scale.unwrap_or_else(|| max(pdf.len() as u32, 10));
           let scale = scale as f32;
 
           pdf
@@ -137,7 +143,7 @@ impl SourceModelBuilder {
           None => match self.num_symbols {
             Some(num_symbols) => vec![1; num_symbols as usize],
             None => match self.binary {
-              _ => vec![1, 1],
+              _ => vec![1, 1], // default to binary case
             },
           },
         },
@@ -163,8 +169,8 @@ impl SourceModelBuilder {
 
     let mut fenwick_counts = vec![0u32; counts.len()];
 
-    for i in 0..counts.len() {
-      update(&mut fenwick_counts, i, counts[i]);
+    for (i, count) in counts.iter().enumerate() {
+      update(&mut fenwick_counts, i, *count);
     }
 
     let total_count = counts.iter().sum();
