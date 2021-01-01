@@ -122,10 +122,9 @@
 //! assert_eq!(output, &[7, 2, 2, 2, 7]);
 //! ```
 
-
-pub mod util;
-pub mod encode;
 pub mod decode;
+pub mod encode;
+pub mod util;
 
 #[cfg(feature = "binary")]
 pub mod binary;

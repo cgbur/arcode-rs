@@ -1,8 +1,8 @@
-use std::io::{Read, ErrorKind, Error};
-use bitbit::reader::Bit;
-use bitbit::BitReader;
 use crate::util::range::Range;
 use crate::util::source_model::SourceModel;
+use bitbit::reader::Bit;
+use bitbit::BitReader;
+use std::io::{Error, ErrorKind, Read};
 
 pub struct ArithmeticDecoder {
   range: Range,
@@ -28,9 +28,10 @@ impl ArithmeticDecoder {
   }
 
   pub fn decode<R: Read, B: Bit>(
-    &mut self, source_model:
-    &SourceModel, bit_source:
-    &mut BitReader<R, B>) -> Result<u32, Error> {
+    &mut self,
+    source_model: &SourceModel,
+    bit_source: &mut BitReader<R, B>,
+  ) -> Result<u32, Error> {
     if self.first_time {
       for _i in 0..self.precision {
         self.input_buffer = (self.input_buffer << 1) | self.bit(bit_source)?;
@@ -72,46 +73,53 @@ impl ArithmeticDecoder {
 
     while self.range.in_middle_half() {
       self.range.scale_middle_half();
-      self.input_buffer = (2 * (self.input_buffer - self.range.quarter())) | self.bit(bit_source)?;
+      self.input_buffer =
+        (2 * (self.input_buffer - self.range.quarter())) | self.bit(bit_source)?;
     }
     Ok(symbol)
   }
 
-
-  fn bit<R: Read, B: Bit>(&mut self, source: &mut BitReader<R, B>)
-                          -> Result<u64, Error> {
+  fn bit<R: Read, B: Bit>(&mut self, source: &mut BitReader<R, B>) -> Result<u64, Error> {
     match source.read_bit() {
       Ok(res) => Ok(res as u64),
       Err(_e) => {
         if self.precision == 0 {
-          return Err(Error::new(ErrorKind::UnexpectedEof,
-                                "EOF has been read $PRECISION times and \n\
+          return Err(Error::new(
+            ErrorKind::UnexpectedEof,
+            "EOF has been read $PRECISION times and \n\
                                           EOF symbol has not been decoded.\n\
-                                           Did you forget to encode the EOF symbol?"));
+                                           Did you forget to encode the EOF symbol?",
+          ));
         }
         self.precision -= 1;
         Ok(0)
       }
     }
   }
+
   pub fn set_finished(&mut self) {
     self.finished = true;
   }
-  pub fn finished(&self) -> bool { self.finished }
+
+  pub fn finished(&self) -> bool {
+    self.finished
+  }
 }
 
 #[cfg(test)]
 mod tests {
-  use std::io::Cursor;
-  use bitbit::{BitReader, MSB};
   use crate::decode::decoder::ArithmeticDecoder;
-  use crate::util::source_model_builder::{SourceModelBuilder, EOFKind};
+  use crate::util::source_model_builder::{EOFKind, SourceModelBuilder};
+  use bitbit::{BitReader, MSB};
+  use std::io::Cursor;
 
   #[test]
   fn e2e() {
     let input = Cursor::new(vec![184, 96, 208]);
     let mut source_model = SourceModelBuilder::new()
-        .num_symbols(10).eof(EOFKind::End).build();
+      .num_symbols(10)
+      .eof(EOFKind::End)
+      .build();
     let mut output = Vec::new();
     let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 
@@ -119,7 +127,9 @@ mod tests {
     while !decoder.finished() {
       let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
       source_model.update_symbol(sym);
-      if sym != source_model.eof() { output.push(sym) };
+      if sym != source_model.eof() {
+        output.push(sym)
+      };
     }
     assert_eq!(output, &[7, 2, 2, 2, 7]);
   }

@@ -1,5 +1,5 @@
 use crate::util::source_model::SourceModel;
-use fenwick::array::{update};
+use fenwick::array::update;
 use std::cmp::max;
 
 pub enum EOFKind {
@@ -70,7 +70,6 @@ impl SourceModelBuilder {
     self
   }
 
-
   /// Constructs new model if you already have counts present.
   /// Implied number of symbols from length of `counts`.
   pub fn counts(&mut self, counts: Vec<u32>) -> &mut Self {
@@ -93,7 +92,9 @@ impl SourceModelBuilder {
   /// Therefore besides determining the accuracy, scale is
   /// used to determine the elasticity of the model.
   pub fn scale(&mut self, mut scale: u32) -> &mut Self {
-    if scale < 10 { scale = 10 }
+    if scale < 10 {
+      scale = 10
+    }
     self.scale = Some(scale);
     self
   }
@@ -125,9 +126,11 @@ impl SourceModelBuilder {
           let scale = self.scale.unwrap_or(max(pdf.len() as u32, 10));
           let scale = scale as f32;
 
-          pdf.iter()
-              .map(|p| max((p * scale) as i32, 1))
-              .map(|c| c as u32).collect()
+          pdf
+            .iter()
+            .map(|p| max((p * scale) as i32, 1))
+            .map(|c| c as u32)
+            .collect()
         }
         None => match self.num_bits {
           Some(num_bits) => vec![1; 1 << num_bits as usize],
@@ -135,30 +138,27 @@ impl SourceModelBuilder {
             Some(num_symbols) => vec![1; num_symbols as usize],
             None => match self.binary {
               _ => vec![1, 1],
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     };
-
 
     let eof = match &self.eof {
       None => counts.len() as u32,
-      Some(eof_kind) => {
-        match eof_kind {
-          EOFKind::Specify(index) => {
-            assert!(*index < counts.len() as u32);
-            *index
-          },
-          EOFKind::Start => 0,
-          EOFKind::End => counts.len() as u32 - 1,
-          EOFKind::EndAddOne => {
-            counts.push(1);
-            counts.len() as u32 - 1
-          }
-          EOFKind::None => counts.len() as u32
+      Some(eof_kind) => match eof_kind {
+        EOFKind::Specify(index) => {
+          assert!(*index < counts.len() as u32);
+          *index
         }
-      }
+        EOFKind::Start => 0,
+        EOFKind::End => counts.len() as u32 - 1,
+        EOFKind::EndAddOne => {
+          counts.push(1);
+          counts.len() as u32 - 1
+        }
+        EOFKind::None => counts.len() as u32,
+      },
     };
 
     let mut fenwick_counts = vec![0u32; counts.len()];
@@ -172,11 +172,10 @@ impl SourceModelBuilder {
   }
 }
 
-
 #[cfg(test)]
 mod tests {
-  use crate::util::source_model_builder::{SourceModelBuilder, EOFKind};
   use crate::util::source_model::SourceModel;
+  use crate::util::source_model_builder::{EOFKind, SourceModelBuilder};
 
   fn model_eq(a: &SourceModel, b: &SourceModel) {
     assert_eq!(a.eof(), b.eof(), "EOF not equal");
@@ -189,12 +188,7 @@ mod tests {
   fn num_symbols() {
     let sut = SourceModelBuilder::new().num_symbols(4).build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 4);
 
     model_eq(&reference, &sut);
   }
@@ -203,69 +197,50 @@ mod tests {
   fn num_bits() {
     let sut = SourceModelBuilder::new().num_bits(2).build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 4);
 
     model_eq(&reference, &sut);
   }
 
   #[test]
   fn counts() {
-    let sut = SourceModelBuilder::new().counts(
-      vec![4, 1, 3, 1]
-    ).build();
+    let sut = SourceModelBuilder::new().counts(vec![4, 1, 3, 1]).build();
 
-    let reference = SourceModel::from_values(
-      vec![4, 1, 3, 1],
-      vec![4, 5, 3, 9],
-      9,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![4, 1, 3, 1], vec![4, 5, 3, 9], 9, 4);
 
     model_eq(&reference, &sut);
   }
 
   #[test]
   fn pdf() {
-    let sut = SourceModelBuilder::new().pdf(
-      vec![0.4, 0.2, 0.3, 0.1]
-    ).build();
+    let sut = SourceModelBuilder::new()
+      .pdf(vec![0.4, 0.2, 0.3, 0.1])
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![4, 2, 3, 1],
-      vec![4, 6, 3, 10],
-      10,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![4, 2, 3, 1], vec![4, 6, 3, 10], 10, 4);
 
     model_eq(&reference, &sut);
   }
 
   #[test]
   fn pdf_scale() {
-    let sut = SourceModelBuilder::new().pdf(
-      vec![0.4, 0.2, 0.3, 0.1]
-    ).scale(20).build();
+    let sut = SourceModelBuilder::new()
+      .pdf(vec![0.4, 0.2, 0.3, 0.1])
+      .scale(20)
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![8, 4, 6, 2],
-      vec![8, 12, 6, 20],
-      20,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![8, 4, 6, 2], vec![8, 12, 6, 20], 20, 4);
 
     model_eq(&reference, &sut);
   }
 
   #[test]
   fn pdf_scale_defaults_length() {
-    let sut = SourceModelBuilder::new().pdf(
-      vec![0.4, 0.2, 0.3, 0.1, 0.4, 0.2, 0.3, 0.4, 0.2, 0.3, 0.4, 0.2, 0.3,0.0,0.0]
-    ).build();
+    let sut = SourceModelBuilder::new()
+      .pdf(vec![
+        0.4, 0.2, 0.3, 0.1, 0.4, 0.2, 0.3, 0.4, 0.2, 0.3, 0.4, 0.2, 0.3, 0.0, 0.0,
+      ])
+      .build();
 
     let reference = SourceModel::from_values(
       vec![6, 3, 4, 1, 6, 3, 4, 6, 3, 4, 6, 3, 4, 1, 1],
@@ -281,46 +256,28 @@ mod tests {
   fn binary() {
     let sut = SourceModelBuilder::new().binary().build();
 
-    let reference = SourceModel::from_values(
-      vec![1,1],
-      vec![1,2],
-      2,
-      2,
-    );
+    let reference = SourceModel::from_values(vec![1, 1], vec![1, 2], 2, 2);
 
     model_eq(&reference, &sut);
   }
-
 
   #[test]
   fn default_binary() {
     let sut = SourceModelBuilder::new().build();
 
-    let reference = SourceModel::from_values(
-      vec![1,1],
-      vec![1,2],
-      2,
-      2,
-    );
+    let reference = SourceModel::from_values(vec![1, 1], vec![1, 2], 2, 2);
 
     model_eq(&reference, &sut);
   }
 
-
-
   #[test]
   fn eof_end() {
     let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(EOFKind::End)
-        .build();
+      .num_symbols(4)
+      .eof(EOFKind::End)
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      3,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 3);
 
     model_eq(&reference, &sut);
   }
@@ -328,16 +285,11 @@ mod tests {
   #[test]
   fn eof_end_add() {
     let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(EOFKind::EndAddOne)
-        .build();
+      .num_symbols(4)
+      .eof(EOFKind::EndAddOne)
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1, 1],
-      vec![1, 2, 1, 4, 1],
-      5,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1, 1], vec![1, 2, 1, 4, 1], 5, 4);
 
     model_eq(&reference, &sut);
   }
@@ -345,16 +297,11 @@ mod tests {
   #[test]
   fn eof_start() {
     let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(EOFKind::Start)
-        .build();
+      .num_symbols(4)
+      .eof(EOFKind::Start)
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      0,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 0);
 
     model_eq(&reference, &sut);
   }
@@ -362,16 +309,11 @@ mod tests {
   #[test]
   fn eof_specify() {
     let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(EOFKind::Specify(2))
-        .build();
+      .num_symbols(4)
+      .eof(EOFKind::Specify(2))
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      2,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 2);
 
     model_eq(&reference, &sut);
   }
@@ -379,32 +321,20 @@ mod tests {
   #[test]
   fn eof_none() {
     let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(EOFKind::None)
-        .build();
+      .num_symbols(4)
+      .eof(EOFKind::None)
+      .build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 4);
 
     model_eq(&reference, &sut);
   }
 
   #[test]
   fn eof_default() {
-    let sut = SourceModelBuilder::new()
-        .num_symbols(4)
-        .build();
+    let sut = SourceModelBuilder::new().num_symbols(4).build();
 
-    let reference = SourceModel::from_values(
-      vec![1, 1, 1, 1],
-      vec![1, 2, 1, 4],
-      4,
-      4,
-    );
+    let reference = SourceModel::from_values(vec![1, 1, 1, 1], vec![1, 2, 1, 4], 4, 4);
 
     model_eq(&reference, &sut);
   }

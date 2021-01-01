@@ -1,13 +1,13 @@
-use std::io::{Write, Read, Error};
-use bitbit::{BitWriter, BitReader};
-use crate::util::source_model::SourceModel;
-use crate::encode::encoder::ArithmeticEncoder;
-use bitbit::reader::Bit;
 use crate::decode::decoder::ArithmeticDecoder;
+use crate::encode::encoder::ArithmeticEncoder;
+use crate::util::source_model::SourceModel;
 use crate::util::source_model_builder::SourceModelBuilder;
+use bitbit::reader::Bit;
+use bitbit::{BitReader, BitWriter};
+use std::io::{Error, Read, Write};
 
 pub struct BinaryCoder {
-  models: Vec<SourceModel>
+  models: Vec<SourceModel>,
 }
 
 impl BinaryCoder {
@@ -21,17 +21,19 @@ impl BinaryCoder {
     for _i in 0..bit_width {
       models.push(SourceModelBuilder::new().binary().build());
     }
-    Self {
-      models
-    }
+    Self { models }
   }
 
   pub fn from_values(models: Vec<SourceModel>) -> Self {
     Self { models }
   }
 
-  pub fn encode<W: Write>(&mut self, encoder: &mut ArithmeticEncoder, output: &mut BitWriter<W>, value: u32)
-                          -> Result<(), Error> {
+  pub fn encode<W: Write>(
+    &mut self,
+    encoder: &mut ArithmeticEncoder,
+    output: &mut BitWriter<W>,
+    value: u32,
+  ) -> Result<(), Error> {
     for i in 0..self.models.len() {
       let symbol = (value >> (self.models.len() - i - 1) as u32) & 0x1;
       encoder.encode(symbol, &self.models[i], output)?;
@@ -40,7 +42,11 @@ impl BinaryCoder {
     Ok(())
   }
 
-  pub fn decode<R: Read, B: Bit>(&mut self, decoder: &mut ArithmeticDecoder, input: &mut BitReader<R, B>) -> Result<u32, Error> {
+  pub fn decode<R: Read, B: Bit>(
+    &mut self,
+    decoder: &mut ArithmeticDecoder,
+    input: &mut BitReader<R, B>,
+  ) -> Result<u32, Error> {
     let mut value: u32 = 0;
     for model in self.models.iter_mut() {
       let sym = decoder.decode(model, input)?;

@@ -9,16 +9,18 @@ pub struct SourceModel {
   eof: u32,
 }
 
-use fenwick::array::{update, prefix_sum};
+use fenwick::array::{prefix_sum, update};
 
 impl SourceModel {
   /// For loading a saved model. Use the
   /// [SourceModelBuilder](crate::util::source_model_builder) for
   /// more options.
-  pub fn from_values(counts: Vec<u32>,
-                     fenwick_counts: Vec<u32>,
-                     total_count: u32,
-                     eof: u32, ) -> Self {
+  pub fn from_values(
+    counts: Vec<u32>,
+    fenwick_counts: Vec<u32>,
+    total_count: u32,
+    eof: u32,
+  ) -> Self {
     Self {
       counts,
       fenwick_counts,
@@ -43,7 +45,8 @@ impl SourceModel {
   }
 
   pub fn low(&self, index: u32) -> f64 {
-    let low: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize) - self.counts[index as usize];
+    let low: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize)
+      - self.counts[index as usize];
     low as f64 / self.total_count as f64
   }
 
@@ -52,6 +55,7 @@ impl SourceModel {
 
     let high = prefix_sum(&self.fenwick_counts, symbol as usize);
     let low = high - self.counts[symbol as usize];
+
     (low as f64 / total, high as f64 / total)
   }
 
@@ -66,6 +70,7 @@ impl SourceModel {
   pub fn fenwick_counts(&self) -> &Vec<u32> {
     &self.fenwick_counts
   }
+
   pub fn total_count(&self) -> u32 {
     self.total_count
   }
@@ -73,15 +78,12 @@ impl SourceModel {
 
 #[cfg(test)]
 mod tests {
-  use crate::util::source_model_builder::SourceModelBuilder;
   use crate::util::source_model_builder::EOFKind::End;
+  use crate::util::source_model_builder::SourceModelBuilder;
 
   #[test]
   fn constructor() {
-    let model = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(End)
-        .build();
+    let model = SourceModelBuilder::new().num_symbols(4).eof(End).build();
 
     assert_eq!(3, model.eof());
     assert_eq!(model.probability(0), (0.0, 0.25));
@@ -112,15 +114,12 @@ mod tests {
 
   #[test]
   fn constructor_from_counts() {
-    let mut model = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(End)
-        .build();
+    let mut model = SourceModelBuilder::new().num_symbols(4).eof(End).build();
 
     let counts_model = SourceModelBuilder::new()
-        .counts(vec![1;4])
-        .eof(End)
-        .build();
+      .counts(vec![1; 4])
+      .eof(End)
+      .build();
 
     assert_eq!(3, model.eof());
     assert_eq!(model.probability(0), counts_model.probability(0));
@@ -135,9 +134,9 @@ mod tests {
     model.update_symbol(2);
 
     let counts_model = SourceModelBuilder::new()
-        .counts(vec![4, 1, 3, 1])
-        .eof(End)
-        .build();
+      .counts(vec![4, 1, 3, 1])
+      .eof(End)
+      .build();
     assert_eq!(model.probability(0), counts_model.probability(0));
     assert_eq!(model.probability(1), counts_model.probability(1));
     assert_eq!(model.probability(2), counts_model.probability(2));
@@ -146,14 +145,12 @@ mod tests {
 
   #[test]
   fn constructor_from_pdf() {
-    let mut model = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(End)
-        .build();
+    let mut model = SourceModelBuilder::new().num_symbols(4).eof(End).build();
 
     let pdf_model = SourceModelBuilder::new()
-        .pdf(vec![0.25f32; 4]).eof(End).build();
-
+      .pdf(vec![0.25f32; 4])
+      .eof(End)
+      .build();
 
     assert_eq!(3, model.eof());
     assert_eq!(model.probability(0), pdf_model.probability(0));
@@ -168,9 +165,10 @@ mod tests {
     model.update_symbol(2);
     model.update_symbol(2);
 
-
     let pdf_model = SourceModelBuilder::new()
-        .pdf(vec![0.4, 0.2, 0.3, 0.1]).eof(End).build();
+      .pdf(vec![0.4, 0.2, 0.3, 0.1])
+      .eof(End)
+      .build();
 
     assert_eq!(model.probability(0), pdf_model.probability(0));
     assert_eq!(model.probability(1), pdf_model.probability(1));
@@ -180,31 +178,25 @@ mod tests {
 
   #[test]
   fn probability_min() {
-    let model = SourceModelBuilder::new()
-        .num_symbols(2315)
-        .build();
-    assert_eq!(model.probability(0),
-               (model.low(0), model.high(0)));
+    let model = SourceModelBuilder::new().num_symbols(2315).build();
+    assert_eq!(model.probability(0), (model.low(0), model.high(0)));
   }
 
   #[test]
   fn probability_high() {
     let count = 1_000;
 
-    let model = SourceModelBuilder::new()
-        .num_symbols(count + 1)
-        .build();
+    let model = SourceModelBuilder::new().num_symbols(count + 1).build();
 
-    assert_eq!(model.probability(count),
-               (model.low(count), model.high(count)));
+    assert_eq!(
+      model.probability(count),
+      (model.low(count), model.high(count))
+    );
   }
 
   #[test]
   fn update_symbols() {
-    let mut model = SourceModelBuilder::new()
-        .num_symbols(4)
-        .eof(End)
-        .build();
+    let mut model = SourceModelBuilder::new().num_symbols(4).eof(End).build();
 
     model.update_symbol(2);
     model.update_symbol(2);
