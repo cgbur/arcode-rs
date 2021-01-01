@@ -28,7 +28,7 @@ impl ArithmeticEncoder {
     source_model: &SourceModel,
     output: &mut BitWriter<T>,
   ) -> Result<(), Error> {
-    let low_high: (u64, u64) = self.range.calculate_range(symbol, &source_model);
+    let low_high = self.range.calculate_range(symbol, &source_model);
     self.range.update_range(low_high);
 
     while self.range.in_bottom_half() || self.range.in_upper_half() {
@@ -45,26 +45,31 @@ impl ArithmeticEncoder {
       self.pending_bit_count += 1;
       self.range.scale_middle_half();
     }
+
     Ok(())
   }
 
   fn emit<T: Write>(&mut self, bit: bool, output: &mut BitWriter<T>) -> Result<(), Error> {
     output.write_bit(bit)?;
+
     while self.pending_bit_count > 0 {
       output.write_bit(!bit)?;
       self.pending_bit_count -= 1;
     }
+
     Ok(())
   }
 
-  pub fn finish_encode<T: Write>(&mut self, output: &mut BitWriter<T>) -> Result<bool, Error> {
+  pub fn finish_encode<T: Write>(&mut self, output: &mut BitWriter<T>) -> Result<(), Error> {
     self.pending_bit_count += 1;
+
     if self.range.in_bottom_quarter() {
       self.emit(false, output)?;
     } else {
       self.emit(true, output)?;
     }
-    Ok(true)
+
+    Ok(())
   }
 }
 
