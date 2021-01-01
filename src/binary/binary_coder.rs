@@ -56,7 +56,7 @@ impl BinaryCoder {
     Ok(value)
   }
 
-  pub fn models(&self) -> &Vec<SourceModel> {
+  pub fn models(&self) -> &[SourceModel] {
     &self.models
   }
 }
