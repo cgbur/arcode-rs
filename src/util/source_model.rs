@@ -1,3 +1,5 @@
+use fenwick::array::{prefix_sum, update};
+
 /// Symbol table for the encoder/decoder.
 /// Used to store the probabilities as a vector of counts
 /// (number of occurrences). Uniform would be every symbol has
@@ -9,8 +11,6 @@ pub struct SourceModel {
   eof: u32,
   num_symbols: u32,
 }
-
-use fenwick::array::{prefix_sum, update};
 
 impl SourceModel {
   /// For loading a saved model. Use the
@@ -42,12 +42,12 @@ impl SourceModel {
   }
 
   pub fn high(&self, index: u32) -> f64 {
-    let high: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize);
+    let high = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize);
     high as f64 / self.total_count as f64
   }
 
   pub fn low(&self, index: u32) -> f64 {
-    let low: u32 = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize)
+    let low = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize)
       - self.counts[index as usize];
     low as f64 / self.total_count as f64
   }
