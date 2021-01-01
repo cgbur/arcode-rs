@@ -33,7 +33,7 @@ impl ArithmeticDecoder {
     bit_source: &mut BitReader<R, B>,
   ) -> Result<u32, Error> {
     if self.first_time {
-      for _i in 0..self.precision {
+      for _ in 0..self.precision {
         self.input_buffer = (self.input_buffer << 1) | self.bit(bit_source)?;
       }
       self.first_time = false;
@@ -42,6 +42,7 @@ impl ArithmeticDecoder {
     let symbol: u32;
     let mut low_high: (u64, u64);
     let mut sym_idx_low_high = (0, source_model.num_symbols());
+
     loop {
       let sym_idx_mid = (sym_idx_low_high.0 + sym_idx_low_high.1) / 2;
       low_high = self.range.calculate_range(sym_idx_mid, source_model);
@@ -54,6 +55,7 @@ impl ArithmeticDecoder {
         sym_idx_low_high.1 = sym_idx_mid - 1;
       }
     }
+
     if symbol == source_model.eof() {
       self.set_finished();
       return Ok(symbol);
@@ -76,6 +78,7 @@ impl ArithmeticDecoder {
       self.input_buffer =
         (2 * (self.input_buffer - self.range.quarter())) | self.bit(bit_source)?;
     }
+
     Ok(symbol)
   }
 
