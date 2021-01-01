@@ -1,3 +1,5 @@
+![Crates.io](https://img.shields.io/crates/v/arcode) ![Crates.io](https://img.shields.io/crates/l/arcode)
+
 This crate provides the an efficient implementation of
 an [arithmetic encoder/decoder](https://en.wikipedia.org/wiki/Arithmetic_coding). This crate is based off the paper
 that describes arithmetic coding found [here](https://web.stanford.edu/class/ee398a/handouts/papers/WittenACM87ArithmCoding.pdf).
