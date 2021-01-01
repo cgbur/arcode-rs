@@ -1,4 +1,4 @@
-![Crates.io](https://img.shields.io/crates/v/arcode) ![Crates.io](https://img.shields.io/crates/l/arcode)
+![Crates.io](https://img.shields.io/crates/v/arcode?color=blueviolet) ![Crates.io](https://img.shields.io/crates/l/arcode) ![GitHub top language](https://img.shields.io/github/languages/top/cgburgess/arcode-rs?color=orange)
 
 This crate provides the an efficient implementation of
 an [arithmetic encoder/decoder](https://en.wikipedia.org/wiki/Arithmetic_coding). This crate is based off the paper
