@@ -26,11 +26,10 @@ as encoding is done to improve compression.
 - [Encoder](encode/encoder/struct.ArithmeticEncoder.html) encodes symbols given a source model and a symbol.
 - [Decoder](decode/decoder/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
 
-## Examples
-In the git repository there is an [example.rs](https://github.com/Dakati/arithmetic-rs/blob/master/example/example.rs)
-file that is a complete
-encode and decode with some benchmarks. It is hard to construct examples that
-run in the markdown because I don't have access to actual files.
+# Examples
+In the git repository there is an [old_complex.rs](https://github.com/cgburgess/arcode-rs/blob/master/example/example.rs)
+file that does context switching on a per character basis. A simpler example can be found at [new_simple.rs](https://github.com/cgburgess/arcode-rs/blob/master/tests/integration_test.rs)
+
 ## Input and output bitstreams
 In order for arithmetic coding to work streams need to be read a bit at a time (for decoding and for the encoders output).
 Because of this, [BitBit](https://docs.rs/bitbit) is required. Wrapping whatever your input is in a buffered reader/writer

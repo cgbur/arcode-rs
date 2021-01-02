@@ -1,3 +1,6 @@
+/// Note this example is using multiple models to change
+/// the prediction on a per symbol basis. For a cleaner
+/// example look at the integration test found in `tests/`
 use arcode::decode::decoder::ArithmeticDecoder;
 use arcode::encode::encoder::ArithmeticEncoder;
 use arcode::util::source_model::SourceModel;
