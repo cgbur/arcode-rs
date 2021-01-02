@@ -64,6 +64,8 @@ fn sherlock_e2e() {
   let decompressed = decode(&compressed).unwrap();
 
   assert_eq!(sherlock_bytes.len(), decompressed.len());
+
+  // verbose to show index of difference
   sherlock_bytes
     .iter()
     .zip(decompressed.iter())
