@@ -13,6 +13,8 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter, Write};
 use std::time::Instant;
 
+mod doc_examples;
+
 fn main() -> Result<(), Box<dyn Error>> {
   println!("Make sure to run with --release");
   comp_decomp()?;
