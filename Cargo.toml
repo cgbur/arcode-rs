@@ -10,7 +10,7 @@ license = "MIT"
 keywords = ["arithmetic", "coding", "entropy", "compression", "lossless"]
 categories = ["compression", "algorithms", "encoding"]
 readme = "README.md"
-exclude = ["example/*"]
+include = ["src/", "Cargo.toml"]
 
 [features]
 binary = []
