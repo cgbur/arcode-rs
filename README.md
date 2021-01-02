@@ -1,6 +1,12 @@
+# Arcode
+An arithmetic coder for Rust.
+
+
 [![Crates.io](https://img.shields.io/crates/v/arcode?color=blueviolet)](https://crates.io/crates/arcode)
 [![Crates.io](https://img.shields.io/crates/l/arcode)](https://crates.io/crates/arcode)
 [![GitHub top language](https://img.shields.io/github/languages/top/cgburgess/arcode-rs?color=orange)](https://crates.io/crates/arcode)
+
+## About
 
 This crate provides the an efficient implementation of
 an [arithmetic encoder/decoder](https://en.wikipedia.org/wiki/Arithmetic_coding). This crate is based off the paper
@@ -13,14 +19,14 @@ modern day compression scheme. This crate is meant to be included in future proj
 coder e.g. [PPM](https://en.wikipedia.org/wiki/Prediction_by_partial_matching), [LZ77/LZ78](https://en.wikipedia.org/wiki/LZ77_and_LZ78),
 [h265/HEVC](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding).
 
-# Core components
+## Core components
 There are a lot of structs available for use but for the average user there are only a few that will be used.
 - [SourceModel](util/source_model/struct.SourceModel.html) models of the probability of symbols. Counts can be adjusted
 as encoding is done to improve compression.
 - [Encoder](encode/encoder/struct.ArithmeticEncoder.html) encodes symbols given a source model and a symbol.
 - [Decoder](decode/decoder/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
 
-# Examples
+## Examples
 In the git repository there is an [example.rs](https://github.com/Dakati/arithmetic-rs/blob/master/example/example.rs)
 file that is a complete
 encode and decode with some benchmarks. It is hard to construct examples that
@@ -55,7 +61,7 @@ out_writer.pad_to_byte();
 buffered_output.flush();
 ```
 
-## Source Model(s)
+### Source Model(s)
 Depending on your application you could have one or hundreds/thousands of source models.
 The source model is heavily relied on by the encoder and the decoder. If the decoder ever becomes
 out of phase with the encoder you will be decoding nonsense.
@@ -103,7 +109,7 @@ out_writer.pad_to_byte().unwrap();
 
 assert_eq!(output.get_ref(), &[184, 96, 208]);
 ```
-## Decode
+### Decode
 ```rust
 use std::io::Cursor;
 use bitbit::{BitReader, MSB};
