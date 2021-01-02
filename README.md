@@ -55,72 +55,103 @@ fn out_example() {
 ```
 
 ### Source Model(s)
-Depending on your application you could have one or hundreds/thousands of source models.
-The source model is heavily relied on by the encoder and the decoder. If the decoder ever becomes
+Depending on your application you could have one or many source models.
+The source model is relied on by the encoder and the decoder. If the decoder ever becomes
 out of phase with the encoder you will be decoding nonsense.
 
-```rust
-use arcode::util::source_model_builder::{SourceModelBuilder, EOFKind};
-// create a new model that has symbols 0-256
-// 8 bit values + one EOF marker
-let mut model_with_eof = SourceModelBuilder::new()
-          .num_symbols(256).eof(EOFKind::EndAddOne).build();
-// model for 8 bit 0 - 255, if we arent using
-// the EOF flag set it to anything outside the range.
-// Both of the below are equivalent
-let model_without_eof = SourceModelBuilder::new()
-          .num_symbols(256).eof(EOFKind::None).build();
-let model_without_eof = SourceModelBuilder::new()
-         .num_symbols(256).build();
+#### SourceModelBuilder
+In order to make a source model you need to use the SourceModelBuilder struct.
 
-// update the probability of symbol 4.
-model_with_eof.update_symbol(4);
-``
+```rust
+use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+
+fn source_model_example() {
+  // create a new model that has symbols 0-256
+  // 8 bit values + one EOF marker
+  let mut model_with_eof = SourceModelBuilder::new()
+    .num_symbols(256)
+    .eof(EOFKind::EndAddOne)
+    .build();
+  
+  // model for 8 bit 0 - 255, if we arent using
+  // the EOF flag we can set it to NONE or let it default
+  // to none as in the second example below.
+  let model_without_eof = SourceModelBuilder::new()
+    .num_symbols(256)
+    .eof(EOFKind::None)
+    .build();
+  let model_without_eof = SourceModelBuilder::new().num_symbols(256).build();
+
+  // we can also create a model for 0-255 using num_bits
+  let model_8_bit = SourceModelBuilder::new().num_bits(8).build();
+  
+  // update the probability of symbol 4.
+  model_with_eof.update_symbol(4);
+}
+```
 ## Encode
 Encoding some simple input
 ```rust
+use arcode::bitbit::BitWriter;
 use arcode::encode::encoder::ArithmeticEncoder;
-use std::io::Cursor;
-use bitbit::BitWriter;
-use arcode::util::source_model_builder::{SourceModelBuilder, EOFKind};
+use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use std::io::{Cursor, Result};
 
-let mut encoder = ArithmeticEncoder::new(30);
-let mut source_model = SourceModelBuilder::new()
-      .num_symbols(10).eof(EOFKind::End).build();
-let mut output = Cursor::new(vec![]);
-let mut out_writer = BitWriter::new(&mut output);
-let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
+/// Encodes bytes and returns the compressed form
+fn encode(data: &[u8]) -> Result<Vec<u8>> {
+  let mut model = SourceModelBuilder::new()
+    .num_bits(8)
+    .eof(EOFKind::EndAddOne)
+    .build();
 
-for x in to_encode.iter() {
-    encoder.encode(*x, &mut source_model, &mut out_writer).unwrap();
-    source_model.update_symbol(*x);
+  // make a stream to collect the compressed data
+  let compressed = Cursor::new(vec![]);
+  let mut compressed_writer = BitWriter::new(compressed);
+  
+  let mut encoder = ArithmeticEncoder::new(48);
+
+  for &sym in data {
+    encoder.encode(sym as u32, &model, &mut compressed_writer)?;
+    model.update_symbol(sym as u32);
+  }
+
+  encoder.encode(model.eof(), &model, &mut compressed_writer)?;
+  encoder.finish_encode(&mut compressed_writer)?;
+  compressed_writer.pad_to_byte()?;
+
+  // retrieves the bytes from the writer. This will
+  // be cleaner when bitbit updates. Not necessary if
+  // using files or a stream
+  Ok(compressed_writer.get_ref().get_ref().clone())
 }
 
-encoder.encode(source_model.eof(), &source_model, &mut out_writer).unwrap();
-encoder.finish_encode(&mut out_writer).unwrap();
-out_writer.pad_to_byte().unwrap();
-
-assert_eq!(output.get_ref(), &[184, 96, 208]);
 ```
 ### Decode
 ```rust
-use std::io::Cursor;
-use bitbit::{BitReader, MSB};
+use arcode::bitbit::{BitReader, MSB};
 use arcode::decode::decoder::ArithmeticDecoder;
-use arcode::util::source_model_builder::{SourceModelBuilder, EOFKind};
+use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use std::io::{Cursor, Result};
 
-let input = Cursor::new(vec![184, 96, 208]);
-let mut source_model = SourceModelBuilder::new()
-      .num_symbols(10).eof(EOFKind::End).build();
-let mut output = Vec::new();
-let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
-let mut decoder = ArithmeticDecoder::new(30);
+/// Decompresses the data
+fn decode(data: &[u8]) -> Result<Vec<u8>> {
+  let mut model = SourceModelBuilder::new()
+    .num_bits(8)
+    .eof(EOFKind::EndAddOne)
+    .build();
 
-while !decoder.finished() {
-    let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
-    source_model.update_symbol(sym);
-    if sym != source_model.eof() { output.push(sym)};
+  let mut input_reader = BitReader::<_, MSB>::new(data);
+  let mut decoder = ArithmeticDecoder::new(48);
+  let mut decompressed_data = vec![];
+
+  while !decoder.finished() {
+    let sym = decoder.decode(&model, &mut input_reader)?;
+    model.update_symbol(sym);
+    decompressed_data.push(sym as u8);
+  }
+
+  decompressed_data.pop(); // remove the EOF
+
+  Ok(decompressed_data)
 }
-
-assert_eq!(output, &[7, 2, 2, 2, 7]);
 ```
