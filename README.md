@@ -20,6 +20,7 @@ coder e.g. [PPM](https://en.wikipedia.org/wiki/Prediction_by_partial_matching), 
 [h265/HEVC](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding).
 
 ## Core components
+
 There are a lot of structs available for use but for the average user there are only a few that will be used.
 - [SourceModel](util/source_model/struct.SourceModel.html) models of the probability of symbols. Counts can be adjusted
 as encoding is done to improve compression.
@@ -32,32 +33,25 @@ file that does context switching on a per character basis. A simpler example can
 
 ## Input and output bitstreams
 In order for arithmetic coding to work streams need to be read a bit at a time (for decoding and for the encoders output).
-Because of this, [BitBit](https://docs.rs/bitbit) is required. Wrapping whatever your input is in a buffered reader/writer
-should greatly improve performance.
+Because of this, [BitBit](https://docs.rs/bitbit) is required. **Wrapping whatever your input is in a buffered reader/writer
+should greatly improve performance.**
 
-Using bitbit to create an input stream from a file that will be passed to encoder/decoder.
+Using bitbit to create an input stream.
 ```rust
-use std::fs::File;
-use std::io::{BufReader, Cursor};
-use bitbit::{BitReader, MSB};
-//using a cursor because the example cant compile without an actual file
-let r = Cursor::new(vec!['a' as u8, 'b' as u8, 'c' as u8]);
-// let input_file = File::open("some file").unwrap();
-let mut buffer_input = BufReader::new(r);
-let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
-```
-Using bitbit to create an output stream.
-```rust
-use std::fs::File;
-use std::io::{BufWriter, Write, Cursor};
-use bitbit::BitWriter;
-let r = Cursor::new(vec!['a' as u8, 'b' as u8, 'c' as u8]);
-//let mut output_file = File::create("./compressed.any")?;
-let mut buffered_output = BufWriter::new(r);
-let mut out_writer = BitWriter::new(&mut buffered_output);
-//once you are done encoding/decoding...
-out_writer.pad_to_byte();
-buffered_output.flush();
+use arcode::bitbit::{BitReader, MSB, BitWriter};
+use std::io::Cursor;
+
+fn read_example() {
+  // normally you would have a Read type with a BufReader
+  let mut source = Cursor::new(vec![0u8; 4]);
+  let input: BitReader<_, MSB> = BitReader::new(&mut source);
+}
+
+fn out_example() {
+  // once again would be Write type with a BufWriter
+  let compressed = Cursor::new(vec![]);
+  let mut compressed_writer = BitWriter::new(compressed);
+}
 ```
 
 ### Source Model(s)
