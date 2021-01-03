@@ -37,6 +37,7 @@ pub enum EOFKind {
 ///
 /// You should only use one of the build paths
 ///
+#[derive(Default)]
 pub struct SourceModelBuilder {
   counts: Option<Vec<u32>>,
   num_symbols: Option<u32>,
@@ -47,23 +48,9 @@ pub struct SourceModelBuilder {
   binary: bool,
 }
 
-impl Default for SourceModelBuilder {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
 impl SourceModelBuilder {
   pub fn new() -> Self {
-    Self {
-      counts: None,
-      num_symbols: None,
-      num_bits: None,
-      eof: None,
-      pdf: None,
-      scale: None,
-      binary: false,
-    }
+    Self::default()
   }
 
   pub fn num_symbols(&mut self, count: u32) -> &mut Self {
