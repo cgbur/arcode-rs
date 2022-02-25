@@ -163,4 +163,4 @@ pub mod util;
 #[cfg(feature = "binary")]
 pub mod binary;
 
-pub extern crate bitbit;
+pub use bitbit;
