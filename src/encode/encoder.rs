@@ -92,7 +92,7 @@ mod test {
     let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
     for x in &to_encode {
       encoder
-        .encode(*x, &mut source_model, &mut out_writer)
+        .encode(*x, &source_model, &mut out_writer)
         .unwrap();
       source_model.update_symbol(*x);
     }
