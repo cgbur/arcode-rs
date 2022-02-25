@@ -86,7 +86,7 @@ impl SourceModelBuilder {
   /// used to determine the elasticity of the model.
   pub fn scale(&mut self, mut scale: u32) -> &mut Self {
     if scale < 10 {
-      scale = 10
+      scale = 10;
     }
     self.scale = Some(scale);
     self
