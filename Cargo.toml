@@ -11,24 +11,14 @@ keywords = ["arithmetic", "coding", "entropy", "compression", "lossless"]
 categories = ["compression", "algorithms", "encoding"]
 readme = "README.md"
 
-# Comment out include for benching
-include = ["src/", "Cargo.toml"]
-
-[features]
-binary = []
-
 [dependencies]
 bitbit = "0.2.0"
 fenwick = "1.0.0"
 
-#[dev-dependencies]
-#criterion = "0.3"
-#byte-unit = "4.0.9"
+[dev-dependencies]
+criterion = "0.3"
+byte-unit = "4.0.9"
 
-#[[bench]]
-#name = "bench"
-#harness = false
-
-#[[bin]]
-#name = "example-bin"
-#path = "example/example.rs"
+[[bench]]
+name = "bench"
+harness = false
