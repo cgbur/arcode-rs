@@ -36,7 +36,6 @@ pub enum EOFKind {
 ///
 ///
 /// You should only use one of the build paths
-///
 #[derive(Default)]
 pub struct SourceModelBuilder {
     counts: Option<Vec<u32>>,
@@ -73,7 +72,8 @@ impl SourceModelBuilder {
     /// - Specify(u32): Choose a valid index as the EOF `[0, counts.len())`
     /// - Start: index 0
     /// - End: index `counts.len()` - 1
-    /// - EndAddOne: adds an element to `counts` and sets EOF to `counts.len() - 1`
+    /// - EndAddOne: adds an element to `counts` and sets EOF to `counts.len() -
+    ///   1`
     /// - None: Same as not specifying. Sets to value outside symbol rangec
     pub fn eof(&mut self, eof: EOFKind) -> &mut Self {
         self.eof = Some(eof);

@@ -37,13 +37,15 @@ impl Range {
         self.low <= self.one_quarter_mark
     }
 
-    /// scaling the upper half is a left shift, to avoid overflow we minus a 1/2 first
+    /// scaling the upper half is a left shift, to avoid overflow we minus a 1/2
+    /// first
     pub fn scale_upper_half(&mut self) {
         self.low = (self.low - self.half) << 1;
         self.high = (self.high - self.half) << 1;
     }
 
-    /// subtract a quarter is the same as shifting out the second most significant bit
+    /// subtract a quarter is the same as shifting out the second most
+    /// significant bit
     pub fn scale_middle_half(&mut self) {
         self.low = (self.low - self.one_quarter_mark) << 1;
         self.high = (self.high - self.one_quarter_mark) << 1;

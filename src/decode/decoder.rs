@@ -90,9 +90,8 @@ impl ArithmeticDecoder {
                 if self.precision == 0 {
                     return Err(Error::new(
                         ErrorKind::UnexpectedEof,
-                        "EOF has been read $PRECISION times and \n\
-                                          EOF symbol has not been decoded.\n\
-                                           Did you forget to encode the EOF symbol?",
+                        "EOF has been read $PRECISION times and \nEOF symbol has not been \
+                         decoded.\nDid you forget to encode the EOF symbol?",
                     ));
                 }
                 self.precision -= 1;
