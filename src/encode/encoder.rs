@@ -22,14 +22,13 @@ impl ArithmeticEncoder {
         }
     }
 
-
     pub fn encode<T: Write>(
         &mut self,
         symbol: u32,
         source_model: &SourceModel,
         output: &mut BitWriter<T>,
     ) -> Result<(), Error> {
-        let low_high = self.range.calculate_range(symbol, &source_model);
+        let low_high = self.range.calculate_range(symbol, source_model);
         self.range.update_range(low_high);
 
         while self.range.in_bottom_half() || self.range.in_upper_half() {

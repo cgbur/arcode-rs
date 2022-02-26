@@ -10,7 +10,8 @@ pub struct Range {
 
 impl Range {
     pub fn new(precision: u64) -> Self {
-        assert_eq!(precision < 64, true);
+        assert!(precision < 64);
+
         let high: u64 = 1 << precision;
         Self {
             high,
