@@ -156,11 +156,9 @@
 //! }
 //! ```
 
+pub mod binary;
 pub mod decode;
 pub mod encode;
 pub mod util;
 
-#[cfg(feature = "binary")]
-pub mod binary;
-
-pub use bitbit;
+pub extern crate bitbit;
