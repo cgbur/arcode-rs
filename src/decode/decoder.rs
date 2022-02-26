@@ -131,7 +131,7 @@ mod tests {
       let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
       source_model.update_symbol(sym);
       if sym != source_model.eof() {
-        output.push(sym)
+        output.push(sym);
       };
     }
     assert_eq!(output, &[7, 2, 2, 2, 7]);

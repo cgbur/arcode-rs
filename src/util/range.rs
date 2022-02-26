@@ -10,7 +10,7 @@ pub struct Range {
 
 impl Range {
   pub fn new(precision: u64) -> Self {
-    assert_eq!(precision < 64, true);
+    assert!(precision < 64);
     let high: u64 = 1 << precision;
     Self {
       high,
@@ -115,27 +115,27 @@ mod tests {
 
     let mut range = Range::new(8);
     range.update_range(range.calculate_range(0, &model));
-    assert_eq!(range.in_bottom_half(), true);
-    assert_eq!(range.in_upper_half(), false);
-    assert_eq!(range.in_middle_half(), false);
-    assert_eq!(range.in_bottom_quarter(), true);
+    assert!(range.in_bottom_half());
+    assert!(!range.in_upper_half());
+    assert!(!range.in_middle_half());
+    assert!(range.in_bottom_quarter());
 
     let model = SourceModelBuilder::new().num_symbols(3).build();
 
     let mut range = Range::new(8);
     range.update_range(range.calculate_range(2, &model));
-    assert_eq!(range.in_bottom_half(), false);
-    assert_eq!(range.in_upper_half(), true);
-    assert_eq!(range.in_middle_half(), false);
-    assert_eq!(range.in_bottom_quarter(), false);
+    assert!(!range.in_bottom_half());
+    assert!(range.in_upper_half());
+    assert!(!range.in_middle_half());
+    assert!(!range.in_bottom_quarter());
 
     let model = SourceModelBuilder::new().num_symbols(100).build();
 
     let mut range = Range::new(12);
     range.update_range(range.calculate_range(50, &model));
-    assert_eq!(range.in_bottom_half(), false);
-    assert_eq!(range.in_upper_half(), false);
-    assert_eq!(range.in_middle_half(), true);
-    assert_eq!(range.in_bottom_quarter(), false);
+    assert!(!range.in_bottom_half());
+    assert!(!range.in_upper_half());
+    assert!(range.in_middle_half());
+    assert!(!range.in_bottom_quarter());
   }
 }
