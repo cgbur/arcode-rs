@@ -48,7 +48,7 @@ impl BinaryCoder {
     input: &mut BitReader<R, B>,
   ) -> Result<u32, Error> {
     let mut value: u32 = 0;
-    for model in self.models.iter_mut() {
+    for model in &mut self.models {
       let sym = decoder.decode(model, input)?;
       model.update_symbol(sym);
       value = value * 2 + sym;

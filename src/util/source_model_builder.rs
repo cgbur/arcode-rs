@@ -86,7 +86,7 @@ impl SourceModelBuilder {
   /// used to determine the elasticity of the model.
   pub fn scale(&mut self, mut scale: u32) -> &mut Self {
     if scale < 10 {
-      scale = 10
+      scale = 10;
     }
     self.scale = Some(scale);
     self
@@ -129,9 +129,7 @@ impl SourceModelBuilder {
           Some(num_bits) => vec![1; 1 << num_bits as usize],
           None => match self.num_symbols {
             Some(num_symbols) => vec![1; num_symbols as usize],
-            None => match self.binary {
-              _ => vec![1, 1], // default to binary case
-            },
+            None => vec![1, 1], // default to binary case
           },
         },
       },

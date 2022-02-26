@@ -28,7 +28,7 @@ impl ArithmeticEncoder {
     source_model: &SourceModel,
     output: &mut BitWriter<T>,
   ) -> Result<(), Error> {
-    let low_high = self.range.calculate_range(symbol, &source_model);
+    let low_high = self.range.calculate_range(symbol, source_model);
     self.range.update_range(low_high);
 
     while self.range.in_bottom_half() || self.range.in_upper_half() {
@@ -90,10 +90,8 @@ mod test {
     let mut output = Cursor::new(vec![]);
     let mut out_writer = BitWriter::new(&mut output);
     let to_encode: [u32; 5] = [7, 2, 2, 2, 7];
-    for x in to_encode.iter() {
-      encoder
-        .encode(*x, &mut source_model, &mut out_writer)
-        .unwrap();
+    for x in &to_encode {
+      encoder.encode(*x, &source_model, &mut out_writer).unwrap();
       source_model.update_symbol(*x);
     }
     encoder
