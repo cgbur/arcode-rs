@@ -54,6 +54,7 @@ impl BinaryCoder {
             value = value * 2 + sym;
         }
         Ok(value)
+
     }
 
     pub fn models(&self) -> &[SourceModel] {

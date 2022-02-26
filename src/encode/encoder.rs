@@ -22,6 +22,7 @@ impl ArithmeticEncoder {
         }
     }
 
+
     pub fn encode<T: Write>(
         &mut self,
         symbol: u32,
