@@ -17,9 +17,9 @@ fn encode(data: &[u8]) {
 
     for &sym in data {
         encoder
-            .encode(sym as u32, &model, &mut compressed_writer)
+            .encode(sym.into(), &model, &mut compressed_writer)
             .unwrap();
-        model.update_symbol(sym as u32);
+        model.update_symbol(sym.into());
     }
     encoder
         .encode(model.eof(), &model, &mut compressed_writer)
@@ -37,9 +37,9 @@ fn encode_return(data: &[u8]) -> Vec<u8> {
 
     for &sym in data {
         encoder
-            .encode(sym as u32, &model, &mut compressed_writer)
+            .encode(sym.into(), &model, &mut compressed_writer)
             .unwrap();
-        model.update_symbol(sym as u32);
+        model.update_symbol(sym.into());
     }
     encoder
         .encode(model.eof(), &model, &mut compressed_writer)

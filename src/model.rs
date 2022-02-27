@@ -44,43 +44,43 @@ impl Model {
         update(&mut self.fenwick_counts, symbol as usize, 1);
     }
 
-    pub fn num_symbols(&self) -> u32 {
+    pub const fn num_symbols(&self) -> u32 {
         self.num_symbols
     }
 
     pub fn high(&self, index: u32) -> f64 {
         let high = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize);
-        high as f64 / self.total_count as f64
+        f64::from(high) / f64::from(self.total_count)
     }
 
     pub fn low(&self, index: u32) -> f64 {
         let low = fenwick::array::prefix_sum(&self.fenwick_counts, index as usize)
             - self.counts[index as usize];
-        low as f64 / self.total_count as f64
+        f64::from(low) / f64::from(self.total_count)
     }
 
     pub fn probability(&self, symbol: u32) -> (f64, f64) {
-        let total = self.total_count as f64;
+        let total = f64::from(self.total_count);
 
         let high = prefix_sum(&self.fenwick_counts, symbol as usize);
         let low = high - self.counts[symbol as usize];
 
-        (low as f64 / total, high as f64 / total)
+        (f64::from(low) / total, f64::from(high) / total)
     }
 
-    pub fn eof(&self) -> u32 {
+    pub const fn eof(&self) -> u32 {
         self.eof
     }
 
-    pub fn counts(&self) -> &Vec<u32> {
+    pub const fn counts(&self) -> &Vec<u32> {
         &self.counts
     }
 
-    pub fn fenwick_counts(&self) -> &Vec<u32> {
+    pub const fn fenwick_counts(&self) -> &Vec<u32> {
         &self.fenwick_counts
     }
 
-    pub fn total_count(&self) -> u32 {
+    pub const fn total_count(&self) -> u32 {
         self.total_count
     }
 }

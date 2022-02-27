@@ -1,5 +1,6 @@
 use arcode::{EOFKind, Model};
 
+#[allow(dead_code, unused_variables)]
 fn source_model_example() {
     // create a new model that has symbols 0-256
     // 8 bit values + one EOF marker
