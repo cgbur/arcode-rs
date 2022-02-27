@@ -1,7 +1,11 @@
-use crate::util::range::Range;
-use crate::util::source_model::SourceModel;
-use bitbit::BitWriter;
+//! This module contains the main code for the encoder. It also
+//! contains an simple implementation of a binary encoder.
+
 use std::io::{Error, Write};
+
+use bitbit::BitWriter;
+
+use crate::{Model, Range};
 
 pub struct ArithmeticEncoder {
     _precision: u64,
@@ -25,7 +29,7 @@ impl ArithmeticEncoder {
     pub fn encode<T: Write>(
         &mut self,
         symbol: u32,
-        source_model: &SourceModel,
+        source_model: &Model,
         output: &mut BitWriter<T>,
     ) -> Result<(), Error> {
         let low_high = self.range.calculate_range(symbol, source_model);
@@ -75,18 +79,17 @@ impl ArithmeticEncoder {
 
 #[cfg(test)]
 mod test {
-    use crate::encode::encoder::ArithmeticEncoder;
-    use crate::util::source_model_builder::{EOFKind, SourceModelBuilder};
-    use bitbit::BitWriter;
     use std::io::Cursor;
+
+    use bitbit::BitWriter;
+
+    use super::ArithmeticEncoder;
+    use crate::{EOFKind, Model};
 
     #[test]
     fn e2e() {
         let mut encoder = ArithmeticEncoder::new(30);
-        let mut source_model = SourceModelBuilder::new()
-            .num_symbols(10)
-            .eof(EOFKind::End)
-            .build();
+        let mut source_model = Model::builder().num_symbols(10).eof(EOFKind::End).build();
         let mut output = Cursor::new(vec![]);
         let mut out_writer = BitWriter::new(&mut output);
         let to_encode: [u32; 5] = [7, 2, 2, 2, 7];

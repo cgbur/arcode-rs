@@ -1,18 +1,14 @@
-use arcode::decode::decoder::ArithmeticDecoder;
-use arcode::encode::encoder::ArithmeticEncoder;
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use std::io::Cursor;
+
+use arcode::{ArithmeticDecoder, ArithmeticEncoder, EOFKind, Model};
 use bitbit::{BitReader, BitWriter, MSB};
 use byte_unit::Byte;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use std::io::Cursor;
 
 mod sherlock;
 
 fn encode(data: &[u8]) {
-    let mut model = SourceModelBuilder::new()
-        .num_bits(8)
-        .eof(EOFKind::EndAddOne)
-        .build();
+    let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
     let compressed = Cursor::new(vec![]);
     let mut compressed_writer = BitWriter::new(compressed);
@@ -32,10 +28,7 @@ fn encode(data: &[u8]) {
 }
 
 fn encode_return(data: &[u8]) -> Vec<u8> {
-    let mut model = SourceModelBuilder::new()
-        .num_bits(8)
-        .eof(EOFKind::EndAddOne)
-        .build();
+    let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
     let compressed = Cursor::new(vec![]);
     let mut compressed_writer = BitWriter::new(compressed);
@@ -57,10 +50,7 @@ fn encode_return(data: &[u8]) -> Vec<u8> {
 }
 
 fn decode(data: &[u8]) {
-    let mut model = SourceModelBuilder::new()
-        .num_bits(8)
-        .eof(EOFKind::EndAddOne)
-        .build();
+    let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
     let mut input_reader = BitReader::<_, MSB>::new(data);
     let mut decoder = ArithmeticDecoder::new(48);

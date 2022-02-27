@@ -1,17 +1,17 @@
-/// Note this example is using multiple models to change
-/// the prediction on a per symbol basis. For a cleaner
-/// example look at the integration test found in `tests/`
-use arcode::decode::decoder::ArithmeticDecoder;
-use arcode::encode::encoder::ArithmeticEncoder;
-use arcode::util::source_model::SourceModel;
-use arcode::util::source_model_builder::EOFKind::End;
-use arcode::util::source_model_builder::SourceModelBuilder;
+//! Note this example is using multiple models to change
+//! the prediction on a per symbol basis. For a cleaner
+//! example look at the integration test found in `tests/`
+
+use std::{
+    error::Error,
+    fs,
+    fs::File,
+    io::{BufReader, BufWriter, Write},
+    time::Instant,
+};
+
+use arcode::{ArithmeticDecoder, ArithmeticEncoder, EOFKind, Model};
 use bitbit::{BitReader, BitWriter, MSB};
-use std::error::Error;
-use std::fs;
-use std::fs::File;
-use std::io::{BufReader, BufWriter, Write};
-use std::time::Instant;
 
 mod doc_examples;
 
@@ -39,11 +39,11 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
 
         let mut models = Vec::with_capacity(num_symbols);
         for _i in 0..num_symbols {
-            // models.push(SourceModel::new(num_symbols as u32, 256));
+            // models.push(Model::new(num_symbols as u32, 256));
             models.push(
-                SourceModelBuilder::new()
+                Model::builder()
                     .num_symbols(num_symbols as u32)
-                    .eof(End)
+                    .eof(EOFKind::End)
                     .build(),
             );
         }
@@ -79,7 +79,7 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
 
     let compressed_bytes = fs::metadata(compressed_path).unwrap().len();
 
-    //decode
+    // decode
     if true {
         let mut decoder = ArithmeticDecoder::new(precision);
 
@@ -93,9 +93,9 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
         let mut models = Vec::with_capacity(num_symbols);
         for _i in 0..num_symbols {
             models.push(
-                SourceModelBuilder::new()
+                Model::builder()
                     .num_symbols(num_symbols as u32)
-                    .eof(End)
+                    .eof(EOFKind::End)
                     .build(),
             );
         }

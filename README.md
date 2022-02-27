@@ -22,10 +22,10 @@ coder e.g. [PPM](https://en.wikipedia.org/wiki/Prediction_by_partial_matching), 
 ## Core components
 
 There are a lot of structs available for use but for the average user there are only a few that will be used.
-- [SourceModel](util/source_model/struct.SourceModel.html) models of the probability of symbols. Counts can be adjusted
+- [Model](model/struct.Model.html) models of the probability of symbols. Counts can be adjusted
 as encoding is done to improve compression.
-- [Encoder](encode/encoder/struct.ArithmeticEncoder.html) encodes symbols given a source model and a symbol.
-- [Decoder](decode/decoder/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
+- [Encoder](encode/struct.ArithmeticEncoder.html) encodes symbols given a source model and a symbol.
+- [Decoder](decode/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
 
 # Examples
 In the git repository there is an [old_complex.rs](https://github.com/cgburgess/arcode-rs/blob/master/example/example.rs)
@@ -59,16 +59,16 @@ Depending on your application you could have one or many source models.
 The source model is relied on by the encoder and the decoder. If the decoder ever becomes
 out of phase with the encoder you will be decoding nonsense.
 
-#### SourceModelBuilder
-In order to make a source model you need to use the SourceModelBuilder struct.
+#### model::Builder
+In order to make a source model you need to use the model::Builder struct.
 
 ```rust
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use arcode::{EOFKind, Model};
 
 fn source_model_example() {
   // create a new model that has symbols 0-256
   // 8 bit values + one EOF marker
-  let mut model_with_eof = SourceModelBuilder::new()
+  let mut model_with_eof = Model::builder()
     .num_symbols(256)
     .eof(EOFKind::EndAddOne)
     .build();
@@ -76,14 +76,14 @@ fn source_model_example() {
   // model for 8 bit 0 - 255, if we arent using
   // the EOF flag we can set it to NONE or let it default
   // to none as in the second example below.
-  let model_without_eof = SourceModelBuilder::new()
+  let model_without_eof = Model::builder()
     .num_symbols(256)
     .eof(EOFKind::None)
     .build();
-  let model_without_eof = SourceModelBuilder::new().num_symbols(256).build();
+  let model_without_eof = Model::builder().num_symbols(256).build();
 
   // we can also create a model for 0-255 using num_bits
-  let model_8_bit = SourceModelBuilder::new().num_bits(8).build();
+  let model_8_bit = Model::builder().num_bits(8).build();
   
   // update the probability of symbol 4.
   model_with_eof.update_symbol(4);
@@ -93,13 +93,12 @@ fn source_model_example() {
 Encoding some simple input
 ```rust
 use arcode::bitbit::BitWriter;
-use arcode::encode::encoder::ArithmeticEncoder;
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use arcode::{ArithmeticEncoder, EOFKind, Model};
 use std::io::{Cursor, Result};
 
 /// Encodes bytes and returns the compressed form
 fn encode(data: &[u8]) -> Result<Vec<u8>> {
-  let mut model = SourceModelBuilder::new()
+  let mut model = Model::builder()
     .num_bits(8)
     .eof(EOFKind::EndAddOne)
     .build();
@@ -129,13 +128,12 @@ fn encode(data: &[u8]) -> Result<Vec<u8>> {
 ### Decode
 ```rust
 use arcode::bitbit::{BitReader, MSB};
-use arcode::decode::decoder::ArithmeticDecoder;
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+use arcode::{ArithmeticDecoder, EOFKind, Model};
 use std::io::{Cursor, Result};
 
 /// Decompresses the data
 fn decode(data: &[u8]) -> Result<Vec<u8>> {
-  let mut model = SourceModelBuilder::new()
+  let mut model = Model::builder()
     .num_bits(8)
     .eof(EOFKind::EndAddOne)
     .build();
