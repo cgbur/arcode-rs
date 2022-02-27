@@ -1,14 +1,13 @@
-use arcode::bitbit::{BitReader, MSB};
-use arcode::decode::decoder::ArithmeticDecoder;
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
 use std::io::{Cursor, Result};
+
+use arcode::{
+    bitbit::{BitReader, MSB},
+    ArithmeticDecoder, EOFKind, Model,
+};
 
 /// Decompresses the data
 fn decode(data: &[u8]) -> Result<Vec<u8>> {
-    let mut model = SourceModelBuilder::new()
-        .num_bits(8)
-        .eof(EOFKind::EndAddOne)
-        .build();
+    let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
     let mut input_reader = BitReader::<_, MSB>::new(data);
     let mut decoder = ArithmeticDecoder::new(48);

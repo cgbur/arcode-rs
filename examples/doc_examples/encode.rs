@@ -1,14 +1,10 @@
-use arcode::bitbit::BitWriter;
-use arcode::encode::encoder::ArithmeticEncoder;
-use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
 use std::io::{Cursor, Result};
+
+use arcode::{bitbit::BitWriter, ArithmeticEncoder, EOFKind, Model};
 
 /// Encodes bytes and returns the compressed form
 fn encode(data: &[u8]) -> Result<Vec<u8>> {
-    let mut model = SourceModelBuilder::new()
-        .num_bits(8)
-        .eof(EOFKind::EndAddOne)
-        .build();
+    let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
     // make a stream to collect the compressed data
     let compressed = Cursor::new(vec![]);

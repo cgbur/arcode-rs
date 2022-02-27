@@ -1,4 +1,4 @@
-use crate::util::source_model::SourceModel;
+use crate::Model;
 
 pub struct Range {
     high: u64,
@@ -59,7 +59,7 @@ impl Range {
     }
 
     /// returns (low, high)
-    pub fn calculate_range(&self, symbol: u32, source_model: &SourceModel) -> (u64, u64) {
+    pub fn calculate_range(&self, symbol: u32, source_model: &Model) -> (u64, u64) {
         let new_width = self.high - self.low;
         let (low, high) = source_model.probability(symbol);
         (
@@ -84,8 +84,7 @@ impl Range {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::range::Range;
-    use crate::util::source_model_builder::SourceModelBuilder;
+    use crate::{Model, Range};
 
     #[test]
     fn constructor() {
@@ -104,7 +103,7 @@ mod tests {
 
     #[test]
     fn calculate_range() {
-        let model = SourceModelBuilder::new().num_symbols(3).build();
+        let model = Model::builder().num_symbols(3).build();
 
         let range = Range::new(8);
         assert_eq!(range.calculate_range(0, &model), (0, 85));
@@ -114,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_range() {
-        let model = SourceModelBuilder::new().num_symbols(3).build();
+        let model = Model::builder().num_symbols(3).build();
 
         let mut range = Range::new(8);
         range.update_range(range.calculate_range(0, &model));
@@ -123,7 +122,7 @@ mod tests {
         assert_eq!(range.in_middle_half(), false);
         assert_eq!(range.in_bottom_quarter(), true);
 
-        let model = SourceModelBuilder::new().num_symbols(3).build();
+        let model = Model::builder().num_symbols(3).build();
 
         let mut range = Range::new(8);
         range.update_range(range.calculate_range(2, &model));
@@ -132,7 +131,7 @@ mod tests {
         assert_eq!(range.in_middle_half(), false);
         assert_eq!(range.in_bottom_quarter(), false);
 
-        let model = SourceModelBuilder::new().num_symbols(100).build();
+        let model = Model::builder().num_symbols(100).build();
 
         let mut range = Range::new(12);
         range.update_range(range.calculate_range(50, &model));

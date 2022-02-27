@@ -1,5 +1,6 @@
-use arcode::bitbit::{BitReader, BitWriter, MSB};
 use std::io::Cursor;
+
+use arcode::bitbit::{BitReader, BitWriter, MSB};
 
 fn read_example() {
     // normally you would have a Read type with a BufReader

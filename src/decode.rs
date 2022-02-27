@@ -1,8 +1,11 @@
-use crate::util::range::Range;
-use crate::util::source_model::SourceModel;
-use bitbit::reader::Bit;
-use bitbit::BitReader;
+//! This module contains the main code for the decoder. It also
+//! contains an simple implementation of a binary decoder.
+
 use std::io::{Error, ErrorKind, Read};
+
+use bitbit::{reader::Bit, BitReader};
+
+use crate::{Model, Range};
 
 pub struct ArithmeticDecoder {
     range: Range,
@@ -29,7 +32,7 @@ impl ArithmeticDecoder {
 
     pub fn decode<R: Read, B: Bit>(
         &mut self,
-        source_model: &SourceModel,
+        source_model: &Model,
         bit_source: &mut BitReader<R, B>,
     ) -> Result<u32, Error> {
         if self.first_time {
@@ -111,18 +114,17 @@ impl ArithmeticDecoder {
 
 #[cfg(test)]
 mod tests {
-    use crate::decode::decoder::ArithmeticDecoder;
-    use crate::util::source_model_builder::{EOFKind, SourceModelBuilder};
-    use bitbit::{BitReader, MSB};
     use std::io::Cursor;
+
+    use bitbit::{BitReader, MSB};
+
+    use super::ArithmeticDecoder;
+    use crate::{EOFKind, Model};
 
     #[test]
     fn e2e() {
         let input = Cursor::new(vec![184, 96, 208]);
-        let mut source_model = SourceModelBuilder::new()
-            .num_symbols(10)
-            .eof(EOFKind::End)
-            .build();
+        let mut source_model = Model::builder().num_symbols(10).eof(EOFKind::End).build();
         let mut output = Vec::new();
         let mut in_reader: BitReader<_, MSB> = BitReader::new(input);
 

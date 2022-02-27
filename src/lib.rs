@@ -24,8 +24,8 @@
 //!
 //! There are a lot of structs available for use but for the average user there
 //! are only a few that will be used.
-//! - [SourceModel](util/source_model/struct.SourceModel.html) models of the
-//!   probability of symbols. Counts can be adjusted
+//! - [Model](util/source_model/struct.Model.html) models of the probability of
+//!   symbols. Counts can be adjusted
 //! as encoding is done to improve compression.
 //! - [Encoder](encode/encoder/struct.ArithmeticEncoder.html) encodes symbols
 //!   given a source model and a symbol.
@@ -43,8 +43,9 @@
 //!
 //! Using bitbit to create an input stream.
 //! ```rust
-//! use arcode::bitbit::{BitReader, BitWriter, MSB};
 //! use std::io::Cursor;
+//!
+//! use arcode::bitbit::{BitReader, BitWriter, MSB};
 //!
 //! fn read_example() {
 //!     // normally you would have a Read type with a BufReader
@@ -64,17 +65,17 @@
 //! The source model is relied on by the encoder and the decoder. If the decoder
 //! ever becomes out of phase with the encoder you will be decoding nonsense.
 //!
-//! #### SourceModelBuilder
-//! In order to make a source model you need to use the SourceModelBuilder
+//! #### ModelBuilder
+//! In order to make a source model you need to use the ModelBuilder
 //! struct.
 //!
 //! ```rust
-//! use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
+//! use arcode::{EOFKind, Model};
 //!
 //! fn source_model_example() {
 //!     // create a new model that has symbols 0-256
 //!     // 8 bit values + one EOF marker
-//!     let mut model_with_eof = SourceModelBuilder::new()
+//!     let mut model_with_eof = Model::builder()
 //!         .num_symbols(256)
 //!         .eof(EOFKind::EndAddOne)
 //!         .build();
@@ -82,14 +83,11 @@
 //!     // model for 8 bit 0 - 255, if we arent using
 //!     // the EOF flag we can set it to NONE or let it default
 //!     // to none as in the second example below.
-//!     let model_without_eof = SourceModelBuilder::new()
-//!         .num_symbols(256)
-//!         .eof(EOFKind::None)
-//!         .build();
-//!     let model_without_eof = SourceModelBuilder::new().num_symbols(256).build();
+//!     let model_without_eof = Model::builder().num_symbols(256).eof(EOFKind::None).build();
+//!     let model_without_eof = Model::builder().num_symbols(256).build();
 //!
 //!     // we can also create a model for 0-255 using num_bits
-//!     let model_8_bit = SourceModelBuilder::new().num_bits(8).build();
+//!     let model_8_bit = Model::builder().num_bits(8).build();
 //!
 //!     // update the probability of symbol 4.
 //!     model_with_eof.update_symbol(4);
@@ -98,17 +96,13 @@
 //! ## Encode
 //! Encoding some simple input
 //! ```rust
-//! use arcode::bitbit::BitWriter;
-//! use arcode::encode::encoder::ArithmeticEncoder;
-//! use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
 //! use std::io::{Cursor, Result};
+//!
+//! use arcode::{bitbit::BitWriter, ArithmeticEncoder, EOFKind, Model};
 //!
 //! /// Encodes bytes and returns the compressed form
 //! fn encode(data: &[u8]) -> Result<Vec<u8>> {
-//!     let mut model = SourceModelBuilder::new()
-//!         .num_bits(8)
-//!         .eof(EOFKind::EndAddOne)
-//!         .build();
+//!     let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 //!
 //!     // make a stream to collect the compressed data
 //!     let compressed = Cursor::new(vec![]);
@@ -133,17 +127,16 @@
 //! ```
 //! ### Decode
 //! ```rust
-//! use arcode::bitbit::{BitReader, MSB};
-//! use arcode::decode::decoder::ArithmeticDecoder;
-//! use arcode::util::source_model_builder::{EOFKind, SourceModelBuilder};
 //! use std::io::{Cursor, Result};
+//!
+//! use arcode::{
+//!     bitbit::{BitReader, MSB},
+//!     ArithmeticDecoder, EOFKind, Model,
+//! };
 //!
 //! /// Decompresses the data
 //! fn decode(data: &[u8]) -> Result<Vec<u8>> {
-//!     let mut model = SourceModelBuilder::new()
-//!         .num_bits(8)
-//!         .eof(EOFKind::EndAddOne)
-//!         .build();
+//!     let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 //!
 //!     let mut input_reader = BitReader::<_, MSB>::new(data);
 //!     let mut decoder = ArithmeticDecoder::new(48);
@@ -162,8 +155,13 @@
 //! ```
 
 pub mod binary;
-pub mod decode;
-pub mod encode;
-pub mod util;
+mod decode;
+mod encode;
+pub mod model;
+mod range;
 
-pub extern crate bitbit;
+pub use bitbit;
+pub use decode::ArithmeticDecoder;
+pub use encode::ArithmeticEncoder;
+pub use model::{EOFKind, Model};
+pub use range::Range;
