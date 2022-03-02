@@ -1,4 +1,4 @@
-use std::io::{Cursor, Result};
+use std::io::Result;
 
 use arcode::{
     bitbit::{BitReader, MSB},
@@ -6,6 +6,7 @@ use arcode::{
 };
 
 /// Decompresses the data
+#[allow(dead_code)]
 fn decode(data: &[u8]) -> Result<Vec<u8>> {
     let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 

@@ -24,107 +24,103 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn comp_decomp() -> Result<(), Box<dyn Error>> {
     let num_symbols = 257;
     let precision = 42;
-    let input_path = "./example/sherlock.txt";
-    let compressed_path = "./example/compressed.dat";
-    let uncompressed_path = "./example/decompressed.txt";
+    let input_path = "./examples/sherlock.txt";
+    let compressed_path = "./examples/compressed.dat";
+    let uncompressed_path = "./examples/decompressed.txt";
 
     let num_bytes = fs::metadata(input_path).unwrap().len();
     let mut byte_break = (num_bytes as f64 / 8f64) as u64;
     if byte_break < 2 {
-        byte_break = 1
+        byte_break = 1;
     };
 
-    if true {
-        let mut encoder = ArithmeticEncoder::new(precision);
+    let mut encoder = ArithmeticEncoder::new(precision);
 
-        let mut models = Vec::with_capacity(num_symbols);
-        for _i in 0..num_symbols {
-            // models.push(Model::new(num_symbols as u32, 256));
-            models.push(
-                Model::builder()
-                    .num_symbols(num_symbols as u32)
-                    .eof(EOFKind::End)
-                    .build(),
-            );
-        }
-        let input_file = File::open(input_path)?;
-        let mut buffer_input = BufReader::new(input_file);
-        let output_file = File::create(compressed_path)?;
-        let mut buffered_output = BufWriter::new(output_file);
-        let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
-        let mut out_writer = BitWriter::new(&mut buffered_output);
-        let encode_start = Instant::now();
-
-        let num_bytes = fs::metadata(input_path).unwrap().len();
-        let mut current_model = &mut models[0];
-        for x in 0..num_bytes {
-            if x % byte_break == 0 {
-                println!("{:.1}%", (x as f64 / num_bytes as f64) * 100.0);
-            }
-            let symbol: u32 = input.read_byte().unwrap() as u32;
-            encoder.encode(symbol, current_model, &mut out_writer)?;
-            current_model.update_symbol(symbol);
-            current_model = &mut models[symbol as usize];
-        }
-        encoder.encode(current_model.eof(), current_model, &mut out_writer)?;
-        encoder.finish_encode(&mut out_writer)?;
-        out_writer.pad_to_byte()?;
-        let finished = encode_start.elapsed().as_millis();
-        println!(
-            "{:.2}Mbps",
-            ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1000000 as f64
+    let mut models = Vec::with_capacity(num_symbols);
+    for _i in 0..num_symbols {
+        // models.push(SourceModel::new(num_symbols as u32, 256));
+        models.push(
+            Model::builder()
+                .num_symbols(num_symbols as u32)
+                .eof(EOFKind::End)
+                .build(),
         );
-        buffered_output.flush()?;
     }
+    let input_file = File::open(input_path)?;
+    let mut buffer_input = BufReader::new(input_file);
+    let output_file = File::create(compressed_path)?;
+    let mut buffered_output = BufWriter::new(output_file);
+    let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
+    let mut out_writer = BitWriter::new(&mut buffered_output);
+    let encode_start = Instant::now();
+
+    let num_bytes = fs::metadata(input_path).unwrap().len();
+    let mut current_model = &mut models[0];
+    for x in 0..num_bytes {
+        if x % byte_break == 0 {
+            println!("{:.1}%", (x as f64 / num_bytes as f64) * 100.0);
+        }
+        let symbol = input.read_byte().unwrap().into();
+        encoder.encode(symbol, current_model, &mut out_writer)?;
+        current_model.update_symbol(symbol);
+        current_model = &mut models[symbol as usize];
+    }
+    encoder.encode(current_model.eof(), current_model, &mut out_writer)?;
+    encoder.finish_encode(&mut out_writer)?;
+    out_writer.pad_to_byte()?;
+    let finished = encode_start.elapsed().as_millis();
+    println!(
+        "{:.2}Mbps",
+        ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1_000_000_f64
+    );
+    buffered_output.flush()?;
 
     let compressed_bytes = fs::metadata(compressed_path).unwrap().len();
 
     // decode
-    if true {
-        let mut decoder = ArithmeticDecoder::new(precision);
+    let mut decoder = ArithmeticDecoder::new(precision);
 
-        let input_file = File::open(compressed_path)?;
-        let mut buffer_input = BufReader::new(input_file);
-        let output_file = File::create(uncompressed_path)?;
-        let mut buffered_output = BufWriter::new(output_file);
-        let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
-        let mut out_writer = BitWriter::new(&mut buffered_output);
+    let input_file = File::open(compressed_path)?;
+    let mut buffer_input = BufReader::new(input_file);
+    let output_file = File::create(uncompressed_path)?;
+    let mut buffered_output = BufWriter::new(output_file);
+    let mut input: BitReader<_, MSB> = BitReader::new(&mut buffer_input);
+    let mut out_writer = BitWriter::new(&mut buffered_output);
 
-        let mut models = Vec::with_capacity(num_symbols);
-        for _i in 0..num_symbols {
-            models.push(
-                Model::builder()
-                    .num_symbols(num_symbols as u32)
-                    .eof(EOFKind::End)
-                    .build(),
-            );
-        }
-
-        let mut x = 0;
-        let decode_start = Instant::now();
-
-        let mut current_model = &mut models[0];
-
-        while !decoder.finished() {
-            if x % byte_break == 0 {
-                println!("{:.1}%", (x as f64 / num_bytes as f64) * 100.0);
-            }
-            let sym = decoder.decode(current_model, &mut input)?;
-            if sym != current_model.eof() {
-                out_writer.write_byte(sym as u8)?;
-            }
-            current_model.update_symbol(sym);
-            current_model = &mut models[sym as usize];
-            x += 1;
-        }
-        let finished = decode_start.elapsed().as_millis();
-        println!(
-            "{:.2}Mbps",
-            ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1000000 as f64
+    let mut models = Vec::with_capacity(num_symbols);
+    for _i in 0..num_symbols {
+        models.push(
+            Model::builder()
+                .num_symbols(num_symbols as u32)
+                .eof(EOFKind::End)
+                .build(),
         );
-
-        buffered_output.flush()?;
     }
+
+    let mut x = 0;
+    let decode_start = Instant::now();
+
+    let mut current_model = &mut models[0];
+
+    while !decoder.finished() {
+        if x % byte_break == 0 {
+            println!("{:.1}%", (x as f64 / num_bytes as f64) * 100.0);
+        }
+        let sym = decoder.decode(current_model, &mut input)?;
+        if sym != current_model.eof() {
+            out_writer.write_byte(sym as u8)?;
+        }
+        current_model.update_symbol(sym);
+        current_model = &mut models[sym as usize];
+        x += 1;
+    }
+    let finished = decode_start.elapsed().as_millis();
+    println!(
+        "{:.2}Mbps",
+        ((num_bytes as f64 * 8.0) / (finished as f64 / 1000.0)) / 1_000_000_f64
+    );
+
+    buffered_output.flush()?;
 
     //
     let input1 = fs::File::open(input_path)?;
@@ -149,7 +145,7 @@ fn comp_decomp() -> Result<(), Box<dyn Error>> {
             );
         }
     } else {
-        println!("files not same length")
+        println!("files not same length");
     }
 
     Ok(())

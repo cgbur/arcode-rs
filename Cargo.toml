@@ -10,7 +10,7 @@ license = "MIT"
 keywords = ["arithmetic", "coding", "entropy", "compression", "lossless"]
 categories = ["compression", "algorithms", "encoding"]
 readme = "README.md"
-rust = "1.56.1"
+rust-version = "1.56.1"
 
 [dependencies]
 bitbit = "0.2.0"

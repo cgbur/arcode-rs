@@ -3,6 +3,7 @@ use std::io::{Cursor, Result};
 use arcode::{bitbit::BitWriter, ArithmeticEncoder, EOFKind, Model};
 
 /// Encodes bytes and returns the compressed form
+#[allow(dead_code)]
 fn encode(data: &[u8]) -> Result<Vec<u8>> {
     let mut model = Model::builder().num_bits(8).eof(EOFKind::EndAddOne).build();
 
@@ -13,8 +14,8 @@ fn encode(data: &[u8]) -> Result<Vec<u8>> {
     let mut encoder = ArithmeticEncoder::new(48);
 
     for &sym in data {
-        encoder.encode(sym as u32, &model, &mut compressed_writer)?;
-        model.update_symbol(sym as u32);
+        encoder.encode(sym.into(), &model, &mut compressed_writer)?;
+        model.update_symbol(sym.into());
     }
 
     encoder.encode(model.eof(), &model, &mut compressed_writer)?;

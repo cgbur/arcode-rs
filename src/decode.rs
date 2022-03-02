@@ -88,7 +88,7 @@ impl ArithmeticDecoder {
 
     fn bit<R: Read, B: Bit>(&mut self, source: &mut BitReader<R, B>) -> Result<u64, Error> {
         match source.read_bit() {
-            Ok(res) => Ok(res as u64),
+            Ok(res) => Ok(u64::from(res)),
             Err(_e) => {
                 if self.precision == 0 {
                     return Err(Error::new(
@@ -107,7 +107,7 @@ impl ArithmeticDecoder {
         self.finished = true;
     }
 
-    pub fn finished(&self) -> bool {
+    pub const fn finished(&self) -> bool {
         self.finished
     }
 }
@@ -133,7 +133,7 @@ mod tests {
             let sym = decoder.decode(&source_model, &mut in_reader).unwrap();
             source_model.update_symbol(sym);
             if sym != source_model.eof() {
-                output.push(sym)
+                output.push(sym);
             };
         }
         assert_eq!(output, &[7, 2, 2, 2, 7]);

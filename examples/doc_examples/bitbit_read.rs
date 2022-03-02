@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables, unused_mut)]
 use std::io::Cursor;
 
 use arcode::bitbit::{BitReader, BitWriter, MSB};

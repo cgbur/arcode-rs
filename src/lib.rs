@@ -24,13 +24,12 @@
 //!
 //! There are a lot of structs available for use but for the average user there
 //! are only a few that will be used.
-//! - [Model](util/source_model/struct.Model.html) models of the probability of
-//!   symbols. Counts can be adjusted
+//! - [`Model`] models of the probability of symbols. Counts can be adjusted
 //! as encoding is done to improve compression.
-//! - [Encoder](encode/encoder/struct.ArithmeticEncoder.html) encodes symbols
-//!   given a source model and a symbol.
-//! - [Decoder](decode/decoder/struct.ArithmeticDecoder.html) decodes symbols
-//!   given a source model and a bitstream.
+//! - [`Encoder`](ArithmeticEncoder) encodes symbols given a source model and a
+//!   symbol.
+//! - ['Decoder'](ArithmeticDecoder) decodes symbols given a source model and a
+//!   bitstream.
 //!
 //! # Examples
 //! In the git repository there is an [old_complex.rs](https://github.com/cgburgess/arcode-rs/blob/master/example/example.rs)
@@ -65,8 +64,8 @@
 //! The source model is relied on by the encoder and the decoder. If the decoder
 //! ever becomes out of phase with the encoder you will be decoding nonsense.
 //!
-//! #### ModelBuilder
-//! In order to make a source model you need to use the ModelBuilder
+//! #### Model Builder
+//! In order to make a source model you need to use the [`model::Builder`]
 //! struct.
 //!
 //! ```rust
