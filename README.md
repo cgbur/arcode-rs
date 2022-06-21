@@ -4,7 +4,7 @@ An arithmetic coder for Rust.
 
 [![Crates.io](https://img.shields.io/crates/v/arcode?color=blueviolet)](https://crates.io/crates/arcode)
 [![Crates.io](https://img.shields.io/crates/l/arcode)](https://crates.io/crates/arcode)
-[![GitHub top language](https://img.shields.io/github/languages/top/cgburgess/arcode-rs?color=orange)](https://crates.io/crates/arcode)
+[![GitHub top language](https://img.shields.io/github/languages/top/cgbur/arcode-rs?color=orange)](https://crates.io/crates/arcode)
 
 ## About
 
@@ -28,8 +28,8 @@ as encoding is done to improve compression.
 - [Decoder](decode/struct.ArithmeticDecoder.html) decodes symbols given a source model and a bitstream.
 
 # Examples
-In the git repository there is an [old_complex.rs](https://github.com/cgburgess/arcode-rs/blob/master/example/example.rs)
-file that does context switching on a per character basis. A simpler example can be found at [new_simple.rs](https://github.com/cgburgess/arcode-rs/blob/master/tests/integration_test.rs)
+In the git repository there is an [old_complex.rs](https://github.com/cgbur/arcode-rs/blob/master/example/example.rs)
+file that does context switching on a per character basis. A simpler example can be found at [new_simple.rs](https://github.com/cgbur/arcode-rs/blob/master/tests/integration_test.rs)
 
 ## Input and output bitstreams
 In order for arithmetic coding to work streams need to be read a bit at a time (for decoding and for the encoders output).

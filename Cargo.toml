@@ -1,11 +1,11 @@
 [package]
 name = "arcode"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Chris Burgess <cgburgess10@gmail.com>"]
 description = "An Arithmetic Coder (lossless entropy encoder)"
 edition = "2021"
-homepage = "https://github.com/cgburgess/arcode-rs"
-repository = "https://github.com/cgburgess/arcode-rs"
+homepage = "https://github.com/cgbur/arcode-rs"
+repository = "https://github.com/cgbur/arcode-rs"
 license = "MIT"
 keywords = ["arithmetic", "coding", "entropy", "compression", "lossless"]
 categories = ["compression", "algorithms", "encoding"]
